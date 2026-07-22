@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة التحليل المالي والتشغيلي | الاتحادات الرياضية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --forest:#0f2f21; --forest-2:#1c4a34; --emerald:#2f7a56; --mint:#8fd9b6; --mint-soft:#e9f6ef;
+  --gold:#c6a15b; --gold-soft:#f5ecd4; --cream:#f7f4ec; --card:#ffffff; --line:#e6dfcb;
+  --red:#b3503f; --red-soft:#fbe8e4; --green:#1c6b45; --green-soft:#e3f3ea;
+  --blue:#3a5a78; --blue-soft:#e7edf3; --pink:#a6486f; --pink-soft:#f6e6ee;
+  --goldmed:#c6952f; --silvermed:#8a939c; --bronzemed:#a5673a;
+  --ink:#122019; --muted:#77897d; --shadow:0 10px 28px -14px rgba(15,47,33,.22); --radius:16px;
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--cream); color:var(--ink); font-family:'IBM Plex Sans Arabic',sans-serif;}
+h1,h2,h3,h4{font-family:'Cairo',sans-serif;}
+::selection{background:var(--mint); color:var(--forest);}
+a{color:inherit;}
+
+.upload-screen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  background:linear-gradient(150deg,var(--forest) 0%, var(--forest-2) 55%, #0a2318 100%); position:relative; overflow:hidden;}
+.upload-screen::before{content:"";position:absolute; inset:0; opacity:.08; pointer-events:none;
+  background-image:repeating-linear-gradient(115deg,transparent 0 26px,rgba(255,255,255,.6) 26px 27px), repeating-linear-gradient(25deg,transparent 0 34px,rgba(255,255,255,.4) 34px 35px);}
+.upload-card{position:relative; background:#fff; border-radius:22px; padding:40px 36px; max-width:560px; width:100%; box-shadow:0 30px 60px -20px rgba(0,0,0,.4); text-align:center;}
+.upload-card .emblem2{width:56px; height:64px; margin:0 auto 14px;}
+.upload-card h1{margin:0 0 6px; font-size:21px; color:var(--forest); font-weight:800;}
+.upload-card p.lead{margin:0 0 22px; font-size:13px; color:var(--muted);}
+.dropzone{border:2px dashed var(--gold); border-radius:16px; padding:32px 20px; cursor:pointer; transition:.2s;}
+.dropzone.dragover{background:var(--gold-soft); border-color:var(--forest);}
+.dropzone .ic{font-size:34px; margin-bottom:8px;}
+.file-btn{display:inline-block; margin-top:14px; background:var(--forest); color:#fff; padding:11px 26px; border-radius:11px; font-weight:700; font-size:13.5px; cursor:pointer; border:none;}
+.file-btn:hover{background:var(--forest-2);}
+.file-status{margin-top:14px; font-size:12.5px; font-weight:600; color:var(--emerald); min-height:18px;}
+.expect-list{text-align:right; margin-top:20px; background:var(--mint-soft); border-radius:12px; padding:14px 16px; font-size:11.5px; color:#3a4a41; line-height:1.9;}
+.expect-list b{color:var(--forest);}
+.error-box{background:var(--red-soft); color:var(--red); padding:10px 14px; border-radius:10px; font-size:12.5px; margin-top:14px; display:none; text-align:right;}
+#appShell{display:none;}
+.loader-overlay{position:fixed; inset:0; background:rgba(15,47,33,.9); z-index:999; display:none; align-items:center; justify-content:center; color:#fff; font-family:'Cairo',sans-serif; font-weight:700; font-size:15px; flex-direction:column; gap:14px;}
+.spinner{width:38px; height:38px; border:4px solid rgba(255,255,255,.25); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+header.top{background:linear-gradient(120deg,var(--forest),var(--forest-2) 60%,#0a2318); color:#fff; padding:18px clamp(14px,4vw,44px) 0; position:relative; overflow:hidden;}
+header.top::before{content:"";position:absolute; inset:0; opacity:.08; pointer-events:none;
+  background-image:repeating-linear-gradient(115deg,transparent 0 26px,rgba(255,255,255,.6) 26px 27px), repeating-linear-gradient(25deg,transparent 0 34px,rgba(255,255,255,.4) 34px 35px);}
+.top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; position:relative;}
+.brand{display:flex; align-items:center; gap:12px;}
+.emblem{width:40px; height:46px; flex:none;}
+.brand h1{margin:0; font-size:clamp(17px,2.1vw,22px); font-weight:800;}
+.brand p{margin:1px 0 0; font-size:12px; color:var(--mint);}
+.fy-badge{background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.2); padding:7px 15px; border-radius:999px; font-size:12.5px; color:var(--gold-soft); font-weight:600;}
+.reupload-btn{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25); color:#fff; padding:7px 14px; border-radius:999px; font-size:11.5px; font-weight:700; cursor:pointer; font-family:inherit;}
+.reupload-btn:hover{background:rgba(255,255,255,.2);}
+
+nav.tabs{display:flex; gap:6px; margin-top:14px; overflow-x:auto; padding-bottom:0; position:relative; scrollbar-width:thin;}
+nav.tabs button{
+  border:none; background:transparent; color:rgba(255,255,255,.65); padding:11px 16px; font-family:'Cairo',sans-serif;
+  font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap; border-radius:10px 10px 0 0; transition:.15s;
+}
+nav.tabs button.active{background:var(--cream); color:var(--forest);}
+nav.tabs button:hover:not(.active){color:#fff; background:rgba(255,255,255,.08);}
+
+.filters-wrap{position:sticky; top:0; z-index:40; background:rgba(247,244,236,.95); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+.filters{max-width:1520px; margin:0 auto; padding:12px clamp(14px,4vw,44px); display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+.filters-dynamic{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;}
+.f-group{display:flex; flex-direction:column; gap:5px;}
+.f-group label{font-size:10.5px; font-weight:700; color:var(--forest); opacity:.7;}
+select.control{appearance:none; border:1.4px solid var(--line); background:#fff; padding:8px 12px; border-radius:9px; font-family:inherit; font-size:12.8px; min-width:150px; cursor:pointer;}
+.seg{display:flex; background:#fff; border:1.4px solid var(--line); border-radius:9px; overflow:hidden;}
+.seg button{border:none; background:transparent; padding:8px 13px; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--forest); cursor:pointer; border-inline-start:1px solid var(--line);}
+.seg button:first-child{border-inline-start:none;}
+.seg button.active{background:var(--forest); color:#fff;}
+.seg.sm button{padding:6px 10px; font-size:11.5px;}
+.chips{display:flex; gap:7px; flex-wrap:wrap; align-items:center;}
+.chip{background:var(--forest); color:#fff; font-size:11.5px; font-weight:700; padding:6px 10px 6px 6px; border-radius:999px; display:flex; align-items:center; gap:6px;}
+.chip button{background:rgba(255,255,255,.2); border:none; color:#fff; width:16px; height:16px; border-radius:50%; font-size:11px; line-height:1; cursor:pointer;}
+.reset-btn{margin-inline-start:auto; border:1.4px dashed var(--gold); background:transparent; color:var(--forest); padding:8px 15px; border-radius:9px; font-weight:700; font-size:12px; cursor:pointer;}
+.reset-btn:hover{background:var(--gold-soft);}
+.hint-click{font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px;}
+
+.multiselect{position:relative;}
+.multiselect .ms-btn{appearance:none; border:1.4px solid var(--line); background:#fff; padding:8px 12px; border-radius:9px;
+  font-family:inherit; font-size:12.5px; min-width:150px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; color:var(--ink);}
+.multiselect .ms-caret{color:var(--muted); font-size:10px;}
+.multiselect .ms-panel{display:none; position:absolute; z-index:60; top:calc(100% + 4px); right:0; background:#fff;
+  border:1.4px solid var(--line); border-radius:10px; box-shadow:var(--shadow); padding:8px; max-height:280px; overflow:auto; min-width:230px;}
+.multiselect.open .ms-panel{display:block;}
+.multiselect .ms-opt{display:flex; align-items:center; gap:7px; font-size:12px; padding:5px 7px; border-radius:6px; cursor:pointer; white-space:nowrap;}
+.multiselect .ms-opt:hover{background:var(--mint-soft);}
+.multiselect .ms-opt.sub{padding-inline-start:22px; font-size:11.3px; color:#4c5b52;}
+.multiselect .ms-opt.strong{font-weight:700; color:var(--forest); border-bottom:1px solid var(--line); margin-bottom:3px; padding-bottom:7px;}
+.geo-country{margin-bottom:3px;}
+.geo-country:not(:last-child){border-bottom:1px dashed var(--line); padding-bottom:4px; margin-bottom:4px;}
+
+main{max-width:1520px; margin:0 auto; padding:22px clamp(14px,4vw,44px) 60px;}
+.kpi-row{display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:22px;}
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:640px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+.kpi{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow);}
+.kpi.accent{background:linear-gradient(135deg,var(--forest),var(--forest-2)); color:#fff; border:none;}
+.kpi.gold{background:linear-gradient(135deg,#c6a15b,#a9834a); color:#fff; border:none;}
+.kpi.warn{background:linear-gradient(135deg,#b3503f,#8c3a2c); color:#fff; border:none;}
+.kpi.blue{background:linear-gradient(135deg,#3a5a78,#294257); color:#fff; border:none;}
+.kpi .label{font-size:11px; opacity:.7; font-weight:700; margin-bottom:7px;}
+.kpi.accent .label,.kpi.gold .label,.kpi.warn .label,.kpi.blue .label{opacity:.85; color:rgba(255,255,255,.85);}
+.kpi .value{font-size:19px; font-weight:800; font-family:'Cairo',sans-serif;}
+.kpi .sub{font-size:10.5px; margin-top:5px; opacity:.55;}
+
+.section-title{display:flex; align-items:center; gap:9px; margin:26px 0 13px; flex-wrap:wrap;}
+.section-title .bar{width:5px; height:18px; background:var(--gold); border-radius:3px;}
+.section-title h2{font-size:15.5px; margin:0; font-weight:800; color:var(--forest);}
+.section-title .desc{font-size:11.5px; color:var(--muted); margin-inline-start:6px;}
+
+.grid2{display:grid; grid-template-columns:1.15fr 1fr; gap:14px;}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+@media(max-width:980px){.grid2,.grid3,.grid4{grid-template-columns:1fr 1fr;}}
+@media(max-width:640px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+
+.panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
+.panel-head{background:linear-gradient(90deg,var(--forest),var(--forest-2)); color:#fff; padding:11px 16px; font-weight:700; font-size:12.8px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+.panel-head small{font-weight:500; opacity:.7; font-size:10.5px;}
+.panel-body{padding:16px;}
+.chart-box{position:relative; height:280px;}
+.chart-box.sm{height:200px;}
+.chart-box.lg{height:360px;}
+canvas{cursor:pointer;}
+
+.cat-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:15px; box-shadow:var(--shadow); cursor:pointer; transition:.15s;}
+.cat-card:hover{border-color:var(--emerald); transform:translateY(-2px);}
+.cat-card.active-card{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold);}
+.cat-card h4{margin:0 0 9px; font-size:13px; color:var(--forest); font-weight:800; border-bottom:2px solid var(--mint-soft); padding-bottom:7px;}
+.cat-row{display:flex; justify-content:space-between; font-size:12px; padding:4px 0; color:#4c5b52;}
+.cat-row b{color:var(--ink); font-weight:700;}
+.pill{display:inline-block; margin-top:9px; padding:4px 11px; border-radius:999px; font-size:11px; font-weight:700;}
+.pill.pos{background:#e3f3ea; color:#1c6b45;}
+.pill.neg{background:var(--red-soft); color:var(--red);}
+.pill.male{background:var(--blue-soft); color:var(--blue);}
+.pill.female{background:var(--pink-soft); color:var(--pink);}
+
+table.datatable{width:100%; border-collapse:collapse; font-size:12.3px;}
+table.datatable th{text-align:right; padding:8px 9px; background:var(--mint-soft); color:var(--forest); font-weight:700; font-size:10.8px; position:sticky; top:0; white-space:nowrap;}
+table.datatable td{padding:8px 9px; border-bottom:1px solid var(--line); white-space:nowrap;}
+table.datatable tr:hover td{background:#faf8ef;}
+table.datatable tfoot td{background:var(--gold-soft); font-weight:800; color:var(--forest); position:sticky; bottom:0;}
+.table-wrap{max-height:520px; overflow:auto; border-radius:0 0 var(--radius) var(--radius);}
+
+.bar-track{background:var(--mint-soft); border-radius:6px; height:8px; overflow:hidden; margin-top:4px;}
+.bar-fill{height:100%; background:var(--emerald); border-radius:6px;}
+
+.dev-badge{display:inline-flex; align-items:center; justify-content:center; min-width:44px; height:22px; padding:0 8px;
+  border-radius:999px; font-size:10.5px; font-weight:800; border:1.6px solid; font-family:'Cairo',sans-serif;}
+.dev-badge.pos{color:var(--green); border-color:var(--green); background:var(--green-soft);}
+.dev-badge.neg{color:var(--red); border-color:var(--red); background:var(--red-soft);}
+.dev-badge.ok{color:var(--muted); border-color:var(--line); background:#f4f1e7;}
+.dev-badge.neutral{color:var(--muted); border-color:var(--line); background:#f4f1e7;}
+
+.gender-tag{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px;}
+.gender-tag.male{background:var(--blue-soft); color:var(--blue);}
+.gender-tag.female{background:var(--pink-soft); color:var(--pink);}
+.gender-tag.na{background:#f4f1e7; color:var(--muted);}
+.type-tag{display:inline-flex; align-items:center; font-size:10.8px; font-weight:700; padding:3px 9px; border-radius:999px; background:var(--mint-soft); color:var(--forest);}
+.type-tag.camp{background:var(--gold-soft); color:#8c6d2f;}
+
+.clickable-row{cursor:pointer;}
+.mini-seg{display:flex; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:8px; overflow:hidden;}
+.mini-seg button{border:none; background:transparent; color:rgba(255,255,255,.75); padding:4px 10px; font-family:inherit; font-size:10.5px; font-weight:700; cursor:pointer;}
+.mini-seg button.active{background:#fff; color:var(--forest);}
+.mini-seg.light{background:#fff; border:1.4px solid var(--line);}
+.mini-seg.light button{color:var(--forest); opacity:.75;}
+.mini-seg.light button.active{background:var(--forest); color:#fff; opacity:1;}
+
+.medal-row{display:flex; gap:10px; flex-wrap:wrap;}
+.medal-chip{display:flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12px; font-weight:700;}
+.medal-dot{width:11px; height:11px; border-radius:50%;}
+.medal-dot.g{background:var(--goldmed);}
+.medal-dot.s{background:var(--silvermed);}
+.medal-dot.b{background:var(--bronzemed);}
+
+.empty-state{padding:40px; text-align:center; color:var(--muted); font-size:13px;}
+footer{text-align:center; padding:26px 16px 40px; color:var(--muted); font-size:12px;}
+footer .logoline{font-weight:800; color:var(--forest); font-family:'Cairo',sans-serif; margin-bottom:4px; font-size:13.5px;}
+.note-line{font-size:11px; color:var(--muted); margin-top:8px; line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="loader-overlay" id="loaderOverlay">
+  <div class="spinner"></div>
+  <div id="loaderText">جاري تحليل البيانات...</div>
+</div>
+
+<div class="upload-screen" id="loginScreen">
+  <div class="upload-card" style="max-width:440px;">
+    <svg class="emblem2" viewBox="0 0 100 116" fill="none">
+      <rect x="4" y="4" width="92" height="100" rx="10" stroke="#123626" stroke-width="4"/>
+      <ellipse cx="50" cy="52" rx="34" ry="40" stroke="#123626" stroke-width="3.5"/>
+      <path d="M50 24 C40 40 40 55 50 70 C60 55 60 40 50 24Z" fill="#123626"/>
+      <path d="M50 30 C34 40 22 46 12 46 C22 54 36 56 50 46Z" fill="#123626" opacity=".85"/>
+      <path d="M50 30 C66 40 78 46 88 46 C78 54 64 56 50 46Z" fill="#123626" opacity=".85"/>
+    </svg>
+    <h1>منصة التحليل المالي والتشغيلي للاتحادات</h1>
+    <p class="lead">اختر نوع الدخول ثم أدخل بيانات الدخول للمتابعة إلى التحليل — البيانات تُقرأ مباشرة من قاعدة البيانات</p>
+
+    <div class="seg" id="loginTypeSeg" style="width:100%; margin-bottom:18px;">
+      <button type="button" data-v="fed" class="active" style="flex:1;">دخول كاتحاد</button>
+      <button type="button" data-v="reviewer" style="flex:1;">دخول كمراجع</button>
+    </div>
+
+    <div id="loginFormFed">
+      <div class="f-group" style="margin-bottom:12px; align-items:stretch;">
+        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">Username</label>
+        <input type="text" id="loginFedUser" class="control" style="width:100%; padding:10px 12px;" autocomplete="off">
+      </div>
+      <div class="f-group" style="margin-bottom:6px; align-items:stretch;">
+        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">Password</label>
+        <input type="password" id="loginFedPass" class="control" style="width:100%; padding:10px 12px;">
+      </div>
+    </div>
+
+    <div id="loginFormReviewer" style="display:none;">
+      <div class="f-group" style="margin-bottom:12px; align-items:stretch;">
+        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">اسم الدخول</label>
+        <input type="text" id="loginRevUser" class="control" style="width:100%; padding:10px 12px;" autocomplete="off">
+      </div>
+      <div class="f-group" style="margin-bottom:6px; align-items:stretch;">
+        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">كلمة المرور</label>
+        <input type="password" id="loginRevPass" class="control" style="width:100%; padding:10px 12px;">
+      </div>
+    </div>
+
+    <button class="file-btn" id="loginSubmitBtn" style="width:100%; border:none; margin-top:10px;">دخول</button>
+    <div class="error-box" id="loginErrorBox"></div>
+  </div>
+</div>
+
+<div id="appShell">
+<header class="top">
+
+  <div class="top-row">
+    <div class="brand">
+      <svg class="emblem" viewBox="0 0 100 116" fill="none">
+        <rect x="4" y="4" width="92" height="100" rx="10" stroke="#8fd9b6" stroke-width="4"/>
+        <ellipse cx="50" cy="52" rx="34" ry="40" stroke="#8fd9b6" stroke-width="3.5"/>
+        <path d="M50 24 C40 40 40 55 50 70 C60 55 60 40 50 24Z" fill="#8fd9b6"/>
+        <path d="M50 30 C34 40 22 46 12 46 C22 54 36 56 50 46Z" fill="#8fd9b6" opacity=".9"/>
+        <path d="M50 30 C66 40 78 46 88 46 C78 54 64 56 50 46Z" fill="#8fd9b6" opacity=".9"/>
+      </svg>
+      <div>
+        <h1>منصة التحليل المالي والتشغيلي للاتحادات</h1>
+        <p>اللجنة الأولمبية والبارالمبية السعودية — بيانات حية من ملف الإكسل</p>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="fy-badge" id="authBadge" style="display:none;"></div>
+      <div class="fy-badge">السنة المالية 2026م</div>
+      <button class="reupload-btn" id="switchUserBtn">🚪 تسجيل خروج</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+
+<div class="filters-wrap">
+  <div class="filters">
+    <div class="filters-dynamic" id="filtersDynamic"></div>
+    <div class="chips" id="chips"></div>
+    <span class="hint-click">💡 انقر على أي رسم بياني أو بطاقة للفلترة التفاعلية</span>
+    <button class="reset-btn" id="resetBtn">↺ إعادة تعيين الكل</button>
+  </div>
+</div>
+
+<main id="page"></main>
+
+<footer>
+  <div class="logoline">TEAM SAUDI</div>
+  إعداد شركة إتقان للاستشارات المهنية — منصة تحليل تفاعلية مبنية من بيانات الإكسل الفعلية — جميع الجداول تُعرض كاملة دون حد أقصى للسجلات
+</footer>
+</div><!-- /appShell -->
+
+<script>
+/* =========================================================================
+   منصة التحليل المالي والتشغيلي للاتحادات — يبني كامل التحليل من ملف إكسل
+   يتوقع 3 أوراق: Federation_data / Activities_data / Financial_data
+   ========================================================================= */
+
+Chart.defaults.font.family = "'IBM Plex Sans Arabic', sans-serif";
+const PALETTE = {forest:"#0f2f21", forest2:"#1c4a34", emerald:"#2f7a56", mint:"#8fd9b6", gold:"#c6a15b",
+  red:"#b3503f", green:"#1c6b45", sand:"#e6dcb8", navy:"#3a5a78", pink:"#a6486f",
+  goldmed:"#c6952f", silvermed:"#8a939c", bronzemed:"#a5673a"};
+const PAL_LIST = [PALETTE.forest, PALETTE.emerald, PALETTE.gold, PALETTE.mint, PALETTE.red, PALETTE.navy, PALETTE.pink, PALETTE.sand, "#7a5c8f", "#4f8fa6"];
+
+const $ = s => document.querySelector(s);
+const fmt = n => (n==null||isNaN(n) ? "—" : Math.round(n).toLocaleString('ar-EG'));
+const fmt1 = n => (n==null||isNaN(n) ? "—" : Number(n).toLocaleString('ar-EG',{maximumFractionDigits:1}));
+const fmtM = n => (n==null||isNaN(n) ? "—" : (n/1e6).toLocaleString('ar-EG',{maximumFractionDigits:2})+" م.ر");
+const fmtSAR = n => (n==null||isNaN(n) ? "—" : fmt(n)+" ر.س");
+const pctStr = n => (n==null||isNaN(n) ? "—" : n.toLocaleString('ar-EG',{maximumFractionDigits:1})+"٪");
+
+/* deviation badge: negative -> red, positive -> green, zero -> neutral (per platform convention) */
+function diffBadge(diff, {isCurrency=false, isPct=false}={}){
+  if(diff==null || isNaN(diff)) return '<span class="dev-badge neutral">—</span>';
+  if(Math.round(diff*100)===0) return '<span class="dev-badge ok">0</span>';
+  const cls = diff>0 ? 'pos' : 'neg';
+  const sign = diff>0 ? '+' : '';
+  const val = isPct ? sign+diff.toFixed(1)+'٪' : (sign + (isCurrency? fmt(diff) : fmt(diff)));
+  return `<span class="dev-badge ${cls}">${val}</span>`;
+}
+function diffBadgePct(actual, ref){
+  if(ref==null || ref===0) return '<span class="dev-badge neutral">—</span>';
+  const d = ((actual-ref)/Math.abs(ref))*100;
+  return diffBadge(d, {isPct:true});
+}
+function genderTag(g){
+  if(g==='رجال') return '<span class="gender-tag male">♂ رجال</span>';
+  if(g==='نساء') return '<span class="gender-tag female">♀ نساء</span>';
+  return '<span class="gender-tag na">غير محدد</span>';
+}
+function typeTag(a){
+  return a.isCamp ? '<span class="type-tag camp">معسكر</span>' : '<span class="type-tag">بطولة</span>';
+}
+
+/* ================= GLOBAL DATA ================= */
+let FED=[], FIN=[], ACT=[];
+let FEDMETA={};
+let QUARTER_ORDER=[];
+/* role: 'admin' (وصول كامل) | 'fed' (اتحاد مسجّل دخول — مقفول عليه فقط) | 'reviewer' (مراجع — مقفول على مراجعه فقط) */
+let AUTH = {role:'admin', fedId:null, reviewerName:null};
+
+/* ================= WORKBOOK PARSING ================= */
+function normHeader(h){ return String(h==null?'':h).trim(); }
+function findSheet(wb, exact, contains){
+  if(wb.Sheets[exact]) return exact;
+  const found = wb.SheetNames.find(n => n.toLowerCase().replace(/\s|_/g,'').includes(contains.toLowerCase()));
+  return found || null;
+}
+function sheetToRows(ws){
+  if(!ws) return [];
+  return XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+}
+function headerIndex(headers, name){
+  const norm = headers.map(normHeader);
+  let i = norm.indexOf(name);
+  if(i>=0) return i;
+  i = norm.findIndex(h => h.toLowerCase()===name.toLowerCase());
+  return i;
+}
+function numOrNull(v){
+  if(v===null || v===undefined || v==='') return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+function num0(v){ const n = numOrNull(v); return n==null ? 0 : n; }
+
+/* ================= PREPARE / DERIVE ================= */
+function prepare(){
+  FEDMETA = {};
+  FED.forEach(f=> FEDMETA[f.id]=f);
+
+  const costMap = new Map();
+  const budgetMap = new Map();
+  FIN.forEach(r=>{
+    if(r.activityId!=null){
+      if(r.isBudget) budgetMap.set(r.activityId, (budgetMap.get(r.activityId)||0) + r.amount);
+      else costMap.set(r.activityId, (costMap.get(r.activityId)||0) + r.amount);
+    }
+  });
+
+  ACT.forEach(a=>{
+    a.actualCost = costMap.get(a.id) || 0;
+    a.budgetCost = budgetMap.get(a.id) || 0;
+    a.isCamp = /معسكر/.test(a.level3);
+    a.isTournament = !a.isCamp;
+    a.medExp = (a.expGold||0)+(a.expSilver||0)+(a.expBronze||0);
+    a.medAct = (a.actGold||0)+(a.actSilver||0)+(a.actBronze||0);
+    a.hasMedals = a.expGold!=null || a.actGold!=null || a.expSilver!=null || a.actSilver!=null || a.expBronze!=null || a.actBronze!=null;
+    a.costPerActualPlayer = a.actPlayers>0 ? a.actualCost/a.actPlayers : null;
+    a.costPerExpectedPlayer = a.expPlayers>0 ? a.actualCost/a.expPlayers : null;
+    a.genderLabel = (a.gender==='رجال'||a.gender==='نساء') ? a.gender : 'غير محدد';
+    a.isIntl = /دولي/.test(a.classification);
+  });
+
+  const qset = new Set();
+  FIN.forEach(r=>qset.add(r.quarter));
+  ACT.forEach(a=>qset.add(a.quarter));
+  const order = ['Q1','Q2','Q3','Q4'];
+  QUARTER_ORDER = order.filter(q=>qset.has(q)).concat([...qset].filter(q=>!order.includes(q)).sort());
+  if(!QUARTER_ORDER.length) QUARTER_ORDER=['غير محدد'];
+}
+
+/* ================= GLOBAL FILTER STATE =================
+   كل مفتاح مصفوفة: [] = الكل (لا فلترة)، أي عناصر بداخلها = فلترة "يساوي أحد هذه القيم" — يسمح باختيار أكثر من عنصر. */
+function emptyGF(){
+  return {fed:[], size:[], quarter:[], stream:[], tier:[], category:[], username:[], password:[], reviewer:[], country:[], city:[]};
+}
+const GF = emptyGF();
+function inFilter(arr, val){ return !arr || !arr.length || arr.includes(val); }
+
+/* page-local filters used within events / gender / geo pages — فلترة سريعة بالنقر على رسم (قيمة واحدة تتبدّل) */
+let LOCAL = {type:"", classification:"", gender:"", level3:"", partCat:"", level2:"", level4:""};
+function clearLocal(){ LOCAL = {type:"", classification:"", gender:"", level3:"", partCat:"", level2:"", level4:""}; GEO_DRILL_COUNTRY = null; }
+let charts = {};
+function destroyChart(k){ if(charts[k]){charts[k].destroy(); charts[k]=null;} }
+
+function matchesFed(fedId){
+  const f = FEDMETA[fedId];
+  if(!inFilter(GF.fed, fedId)) return false;
+  if(!f) return true;
+  if(!inFilter(GF.size, f.size)) return false;
+  if(!inFilter(GF.stream, f.stream)) return false;
+  if(!inFilter(GF.tier, f.tier)) return false;
+  if(!inFilter(GF.category, f.category)) return false;
+  if(!inFilter(GF.username, f.username)) return false;
+  if(!inFilter(GF.password, f.password)) return false;
+  if(!inFilter(GF.reviewer, f.reviewer)) return false;
+  return true;
+}
+function matchesFIN(r){
+  if(!matchesFed(r.fedId)) return false;
+  if(!inFilter(GF.quarter, r.quarter)) return false;
+  return true;
+}
+function matchesACT(a, useLocal=true){
+  if(!matchesFed(a.fedId)) return false;
+  if(!inFilter(GF.quarter, a.quarter)) return false;
+  if(!inFilter(GF.country, a.country)) return false;
+  if(!inFilter(GF.city, a.city)) return false;
+  if(useLocal){
+    if(LOCAL.type==='tournament' && !a.isTournament) return false;
+    if(LOCAL.type==='camp' && !a.isCamp) return false;
+    if(LOCAL.classification && a.classification!==LOCAL.classification) return false;
+    if(LOCAL.gender && a.genderLabel!==LOCAL.gender) return false;
+    if(LOCAL.level3 && a.level3!==LOCAL.level3) return false;
+    if(LOCAL.partCat && a.partCat!==LOCAL.partCat) return false;
+  }
+  return true;
+}
+/* like actRows(), but ignores one specific LOCAL dimension — used so a card grid keeps showing all its cards even when one is the active filter */
+function actsExcluding(excludeKey){
+  return ACT.filter(a=>{
+    if(!matchesFed(a.fedId)) return false;
+    if(!inFilter(GF.quarter, a.quarter)) return false;
+    if(!inFilter(GF.country, a.country)) return false;
+    if(!inFilter(GF.city, a.city)) return false;
+    if(excludeKey!=='type'){
+      if(LOCAL.type==='tournament' && !a.isTournament) return false;
+      if(LOCAL.type==='camp' && !a.isCamp) return false;
+    }
+    if(excludeKey!=='classification' && LOCAL.classification && a.classification!==LOCAL.classification) return false;
+    if(excludeKey!=='gender' && LOCAL.gender && a.genderLabel!==LOCAL.gender) return false;
+    if(excludeKey!=='level3' && LOCAL.level3 && a.level3!==LOCAL.level3) return false;
+    if(excludeKey!=='partCat' && LOCAL.partCat && a.partCat!==LOCAL.partCat) return false;
+    return true;
+  });
+}
+function finRows(extra){ return FIN.filter(r=> matchesFIN(r) && (extra? extra(r): true)); }
+function actRows(extra, useLocal=true){ return ACT.filter(a=> matchesACT(a,useLocal) && (extra? extra(a): true)); }
+
+function sumFin(rows){
+  let actual=0, budget=0;
+  rows.forEach(r=>{ if(r.isBudget) budget+=r.amount; else actual+=r.amount; });
+  return {actual, budget, diff: actual-budget};
+}
+function groupSumFin(rows, keyFn){
+  const m = new Map();
+  rows.forEach(r=>{
+    const k = keyFn(r);
+    if(!m.has(k)) m.set(k,{actual:0,budget:0,count:0});
+    const o = m.get(k);
+    if(r.isBudget) o.budget+=r.amount; else o.actual+=r.amount;
+    o.count++;
+  });
+  return m;
+}
+function mapToSorted(m, by='actual', desc=true){
+  return [...m.entries()].sort((a,b)=> desc? b[1][by]-a[1][by] : a[1][by]-b[1][by]);
+}
+
+/* ================= CATEGORY CARD GRIDS (reused on multiple pages) ================= */
+/* canonical activity-type buckets — always shown even if a bucket has zero linked activities (e.g. "أخرى") */
+const TYPE_BUCKETS = ['البطولات الداخلية','البطولات الخارجية','المعسكرات الداخلية','المعسكرات الخارجية','آخرى'];
+
+/* Type cards: grouped by Level 3 (البطولات الداخلية / الخارجية / المعسكرات الداخلية / الخارجية) — includes real budget figures since Financial_data carries the same Level 3 tag. */
+function typeCardStats(acts, level3Val){
+  const rows = acts.filter(a=>a.level3===level3Val);
+  const fin = finRows(r=> r.level3===level3Val);
+  const {actual, budget} = sumFin(fin);
+  const tourns = rows.filter(a=>a.isTournament);
+  const expPlayers = rows.reduce((s,a)=>s+a.expPlayers,0);
+  const actPlayers = rows.reduce((s,a)=>s+a.actPlayers,0);
+  const medExp = tourns.reduce((s,a)=>s+(a.medExp||0),0);
+  const medAct = tourns.reduce((s,a)=>s+(a.medAct||0),0);
+  return {
+    label: level3Val, count: rows.length, actual, budget,
+    avgPerActivity: rows.length? actual/rows.length : 0,
+    expPlayers, actPlayers, medExp, medAct,
+    avgCostPerPlayerExp: expPlayers? budget/expPlayers : null,
+    avgCostPerPlayerAct: actPlayers? actual/actPlayers : null,
+    isCamp: /معسكر/.test(level3Val),
+  };
+}
+/* شارتان قابلتان لإعادة الاستخدام: فرق متوسط تكلفة اللاعب (فعلي مقابل تقديري) وفرق الميداليات (فعلي مقابل متوقع) —
+   تُستخدم في بطاقات النوع، الفئة العمرية، والتصنيف. الأقل فعلياً في التكلفة = كفاءة أفضل = إيجابي؛ الأعلى في الميداليات الفعلية = إيجابي. */
+function costMedalPillsHTML(avgCostPerPlayerExp, avgCostPerPlayerAct, medExp, medAct){
+  const avgCostDiff = (avgCostPerPlayerExp!=null && avgCostPerPlayerAct!=null) ? (avgCostPerPlayerAct - avgCostPerPlayerExp) : null;
+  const avgCostCls = avgCostDiff==null ? '' : (avgCostDiff<=0 ? 'pos' : 'neg');
+  const avgCostText = avgCostDiff==null ? 'فرق متوسط التكلفة: —' : `فرق متوسط التكلفة: ${avgCostDiff>0?'+':''}${fmt(avgCostDiff)} ر.س`;
+
+  const hasMedals = (medExp || medAct);
+  const medalsDiff = hasMedals ? (medAct - medExp) : null;
+  const medalsCls = medalsDiff==null ? '' : (medalsDiff>=0 ? 'pos' : 'neg');
+  const medalsText = medalsDiff==null ? 'فرق الميداليات: —' : `فرق الميداليات: ${medalsDiff>0?'+':''}${fmt(medalsDiff)}`;
+
+  return `<span class="pill ${avgCostCls}">${avgCostText}</span><span class="pill ${medalsCls}">${medalsText}</span>`;
+}
+function typeCardHTML(o){
+  const active = LOCAL.level3===o.label;
+  const budgetPct = o.budget ? ((o.actual-o.budget)/o.budget*100) : null;
+  const badgeCls = budgetPct==null ? 'ok' : (budgetPct>0?'neg':'pos');
+  const badgeText = budgetPct==null ? '—' : (budgetPct>0? 'تجاوز الموازنة':'ضمن الموازنة')+' • '+Math.abs(budgetPct).toFixed(1)+'٪';
+  const icon = o.label==='آخرى' ? '📁' : (o.isCamp?'🏕️':'🏆');
+
+  return `<div class="cat-card ${active?'active-card':''}" data-level3="${o.label}">
+    <h4>${icon} ${o.label}</h4>
+    <div class="cat-row"><span>الفعلي</span><b>${fmt(o.actual)}</b></div>
+    <div class="cat-row"><span>الموازنة</span><b>${fmt(o.budget)}</b></div>
+    <div class="cat-row"><span>عدد المشاركات</span><b>${fmt(o.count)}</b></div>
+    <div class="cat-row"><span>متوسط المشاركة الواحدة</span><b>${fmt(o.avgPerActivity)}</b></div>
+    <div class="cat-row"><span>اللاعبون (متوقع/فعلي)</span><b>${fmt(o.expPlayers)} / ${fmt(o.actPlayers)}</b></div>
+    <div class="cat-row"><span>الميداليات (متوقع/فعلي)</span><b>${o.medExp||o.medAct? fmt(o.medExp)+' / '+fmt(o.medAct) : '—'}</b></div>
+    <div class="cat-row"><span>متوسط تكلفة اللاعب الواحد (متوقع/فعلي)</span><b>${o.avgCostPerPlayerExp!=null||o.avgCostPerPlayerAct!=null? (fmt(o.avgCostPerPlayerExp)+' / '+fmt(o.avgCostPerPlayerAct)) : '—'}</b></div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+      <span class="pill ${badgeCls==='pos'?'pos':(badgeCls==='neg'?'neg':'')}">${badgeText}</span>
+      ${costMedalPillsHTML(o.avgCostPerPlayerExp, o.avgCostPerPlayerAct, o.medExp, o.medAct)}
+    </div>
+  </div>`;
+}
+function typeCardsHTML(acts){
+  const present = new Set(acts.map(a=>a.level3));
+  const extra = [...present].filter(l=> !TYPE_BUCKETS.includes(l));
+  const levels = TYPE_BUCKETS.concat(extra);
+  return `<div class="grid4">${levels.map(l=> typeCardHTML(typeCardStats(acts,l))).join('')}</div>`;
+}
+function wireTypeCards(root){
+  root.querySelectorAll('[data-level3]').forEach(el=>{
+    el.addEventListener('click', ()=> setLocal('level3', el.dataset.level3));
+  });
+}
+
+/* Age / participant-category cards: grouped by Participant Category — الموازنة هنا مجموعة عبر الأنشطة المرتبطة بنفس الفئة (Activities ID). */
+function ageCardStats(acts, cat){
+  const rows = acts.filter(a=>a.partCat===cat);
+  const tourns = rows.filter(a=>a.isTournament);
+  const actual = rows.reduce((s,a)=>s+a.actualCost,0);
+  const budget = rows.reduce((s,a)=>s+(a.budgetCost||0),0);
+  const expPlayers = rows.reduce((s,a)=>s+a.expPlayers,0);
+  const actPlayers = rows.reduce((s,a)=>s+a.actPlayers,0);
+  const medExp = tourns.reduce((s,a)=>s+(a.medExp||0),0);
+  const medAct = tourns.reduce((s,a)=>s+(a.medAct||0),0);
+  return {
+    label:cat, count:rows.length, actual, budget,
+    avgPerActivity: rows.length? actual/rows.length : 0,
+    expPlayers, actPlayers, medExp, medAct,
+    avgCostPerPlayerExp: expPlayers? budget/expPlayers : null,
+    avgCostPerPlayerAct: actPlayers? actual/actPlayers : null,
+  };
+}
+function ageCardHTML(o){
+  const active = LOCAL.partCat===o.label;
+  const achievedPct = o.expPlayers ? (o.actPlayers/o.expPlayers*100) : null;
+  const pillCls = achievedPct==null ? '' : (achievedPct>=100?'pos':'neg');
+  return `<div class="cat-card ${active?'active-card':''}" data-partcat="${o.label}">
+    <h4>${o.label}</h4>
+    <div class="cat-row"><span>إجمالي الفعلي</span><b>${fmt(o.actual)}</b></div>
+    <div class="cat-row"><span>عدد المشاركات</span><b>${fmt(o.count)}</b></div>
+    <div class="cat-row"><span>متوسط المشاركة الواحدة</span><b>${fmt(o.avgPerActivity)}</b></div>
+    <div class="cat-row"><span>اللاعبون (متوقع/فعلي)</span><b>${fmt(o.expPlayers)} / ${fmt(o.actPlayers)}</b></div>
+    <div class="cat-row"><span>الميداليات (متوقع/فعلي)</span><b>${o.medExp||o.medAct? fmt(o.medExp)+' / '+fmt(o.medAct) : '—'}</b></div>
+    <div class="cat-row"><span>متوسط تكلفة اللاعب الواحد (متوقع/فعلي)</span><b>${o.avgCostPerPlayerExp!=null||o.avgCostPerPlayerAct!=null? (fmt(o.avgCostPerPlayerExp)+' / '+fmt(o.avgCostPerPlayerAct)) : '—'}</b></div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+      ${achievedPct!=null? `<span class="pill ${pillCls}">تحقيق اللاعبين • ${achievedPct.toFixed(0)}٪</span>` : ''}
+      ${costMedalPillsHTML(o.avgCostPerPlayerExp, o.avgCostPerPlayerAct, o.medExp, o.medAct)}
+    </div>
+  </div>`;
+}
+function ageCardsHTML(acts){
+  const cats = [...new Set(acts.map(a=>a.partCat))];
+  if(!cats.length) return '<div class="empty-state">لا توجد فعاليات مطابقة</div>';
+  return `<div class="grid4">${cats.map(c=> ageCardHTML(ageCardStats(acts,c))).join('')}</div>`;
+}
+function wireAgeCards(root){
+  root.querySelectorAll('[data-partcat]').forEach(el=>{
+    el.addEventListener('click', ()=> setLocal('partCat', el.dataset.partcat));
+  });
+}
+
+/* Classification cards — نفس نمط بطاقات النوع/الفئة العمرية، لكن مجمّعة حسب عمود التصنيف (Classification) */
+function classCardStats(acts, classVal){
+  const rows = acts.filter(a=>a.classification===classVal);
+  const tourns = rows.filter(a=>a.isTournament);
+  const cost = rows.reduce((s,a)=>s+a.actualCost,0);
+  const budget = rows.reduce((s,a)=>s+(a.budgetCost||0),0);
+  const expPlayers = rows.reduce((s,a)=>s+a.expPlayers,0);
+  const actPlayers = rows.reduce((s,a)=>s+a.actPlayers,0);
+  const medExp = tourns.reduce((s,a)=>s+(a.medExp||0),0);
+  const medAct = tourns.reduce((s,a)=>s+(a.medAct||0),0);
+  return {
+    label:classVal, count:rows.length, actual:cost, budget,
+    avgPerActivity: rows.length? cost/rows.length : 0,
+    expPlayers, actPlayers, medExp, medAct,
+    avgCostPerPlayerExp: expPlayers? budget/expPlayers : null,
+    avgCostPerPlayerAct: actPlayers? cost/actPlayers : null,
+  };
+}
+function classCardHTML(o){
+  const active = LOCAL.classification===o.label;
+  return `<div class="cat-card ${active?'active-card':''}" data-classification="${o.label}">
+    <h4>${o.label}</h4>
+    <div class="cat-row"><span>الفعلي</span><b>${fmt(o.actual)}</b></div>
+    <div class="cat-row"><span>عدد المشاركات</span><b>${fmt(o.count)}</b></div>
+    <div class="cat-row"><span>متوسط المشاركة الواحدة</span><b>${fmt(o.avgPerActivity)}</b></div>
+    <div class="cat-row"><span>اللاعبون (متوقع/فعلي)</span><b>${fmt(o.expPlayers)} / ${fmt(o.actPlayers)}</b></div>
+    <div class="cat-row"><span>الميداليات (متوقع/فعلي)</span><b>${o.medExp||o.medAct? fmt(o.medExp)+' / '+fmt(o.medAct) : '—'}</b></div>
+    <div class="cat-row"><span>متوسط تكلفة اللاعب الواحد (متوقع/فعلي)</span><b>${o.avgCostPerPlayerExp!=null||o.avgCostPerPlayerAct!=null? (fmt(o.avgCostPerPlayerExp)+' / '+fmt(o.avgCostPerPlayerAct)) : '—'}</b></div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+      ${costMedalPillsHTML(o.avgCostPerPlayerExp, o.avgCostPerPlayerAct, o.medExp, o.medAct)}
+    </div>
+  </div>`;
+}
+function classCardsHTML(acts){
+  const classes = [...new Set(acts.map(a=>a.classification))];
+  if(!classes.length) return '<div class="empty-state">لا توجد فعاليات مطابقة</div>';
+  return `<div class="grid4">${classes.map(c=> classCardHTML(classCardStats(acts,c))).join('')}</div>`;
+}
+function wireClassCards(root){
+  root.querySelectorAll('[data-classification]').forEach(el=>{
+    el.addEventListener('click', ()=> setLocal('classification', el.dataset.classification));
+  });
+}
+
+/* ================= SHARED 3-MODE TOGGLE (عدد / متوسط / مبلغ) =================
+   يُستخدم في: تحليل الجنس، الفئة العمرية، الدول، البطولات والمعسكرات — نفس المنطق في كل مكان:
+   عدد = عدد المشاركات الفعلية (سجلات Activities)، مبلغ = إجمالي التكلفة الفعلية،
+   متوسط = متوسط تكلفة اللاعب الفعلي مقابل متوسط تكلفة اللاعب التقديري (نفس مقياس صفحة البطولات). */
+const VIEW_MODE_LABELS = {count:'عدد المشاركات', avg:'متوسط (فعلي/تقديري)', amount:'المبلغ الفعلي'};
+/* البطولات والمعسكرات فقط: زر رابع "التقديري" لعرض مبلغ الموازنة منفصلاً في الدائري، وأعمدة المبلغ الفعلي تعرض الفعلي والتقديري معاً */
+const EVENTS_MODE_LABELS = {count:'عدد المشاركات', avg:'متوسط (فعلي/تقديري)', amount:'المبلغ الفعلي', budget:'التقديري'};
+function viewToggleHTML(id, current, labels=VIEW_MODE_LABELS, light=false){
+  return `<div class="mini-seg${light?' light':''}" id="${id}">
+    ${Object.entries(labels).map(([k,l])=>`<button data-v="${k}" class="${current===k?'active':''}">${l}</button>`).join('')}
+  </div>`;
+}
+/* يجمع الفعاليات حسب مفتاح (جنس / دولة / فئة عمرية / نوع...) إلى: العدد، التكلفة الفعلية، مجموع اللاعبين المتوقع والفعلي، ومجموع الميداليات المتوقعة والفعلية (بطولات فقط) */
+function groupStatsBy(acts, keyFn){
+  const m = new Map();
+  acts.forEach(a=>{
+    const k = keyFn(a);
+    if(k==null) return;
+    if(!m.has(k)) m.set(k, {label:k, count:0, cost:0, expPlayers:0, actPlayers:0, medExp:0, medAct:0});
+    const o = m.get(k);
+    o.count++; o.cost += a.actualCost; o.expPlayers += a.expPlayers; o.actPlayers += a.actPlayers;
+    if(a.isTournament){ o.medExp += (a.medExp||0); o.medAct += (a.medAct||0); }
+  });
+  return [...m.values()];
+}
+/* رسم "تحقيق الميداليات" لكل عنصر من عناصر المجموعة (فئة عمرية / جنس / تصنيف / دولة) — الفعلي مقابل المتوقع، بطولات فقط */
+function renderMedalsByGroup(canvas, id, groups, opts={}){
+  if(!canvas || !groups.length) return;
+  makeBar(canvas, id, groups.map(g=>g.label), [
+    {label:'الميداليات المتوقعة', data:groups.map(g=>g.medExp||0), backgroundColor:'#d8cba0', borderRadius:5},
+    {label:'الميداليات الفعلية', data:groups.map(g=>g.medAct||0), backgroundColor:PALETTE.goldmed, borderRadius:5},
+  ], {rotate:opts.rotate||0, horizontal:opts.horizontal||false, onClickLabel:opts.onClickLabel});
+}
+/* يرسم نسخة "أعمدة" ثابتة الشكل دائماً — القيم فقط تتغير حسب الوضع.
+   opts.pairAmount=true (مستخدم في البطولات والمعسكرات فقط): وضع "المبلغ الفعلي" يعرض عمودين (الفعلي + التقديري) معاً بدل عمود الفعلي فقط. */
+function renderModeBar(canvas, key, mode, groups, opts={}){
+  if(!canvas || !groups.length) return;
+  if(mode==='avg'){
+    makeBar(canvas, key+'Bar', groups.map(g=>g.label), [
+      {label:'متوسط تكلفة اللاعب التقديري', data:groups.map(g=> g.expPlayers? g.cost/g.expPlayers : null), backgroundColor:PALETTE.sand, borderRadius:5},
+      {label:'متوسط تكلفة اللاعب الفعلي', data:groups.map(g=> g.actPlayers? g.cost/g.actPlayers : null), backgroundColor:PALETTE.emerald, borderRadius:5},
+    ], {rotate:opts.rotate||0, horizontal:opts.horizontal||false, onClickLabel:opts.onClickLabel});
+  }else if(mode==='amount' && opts.pairAmount){
+    makeBar(canvas, key+'Bar', groups.map(g=>g.label), [
+      {label:'التقديري (الموازنة)', data:groups.map(g=>g.budget||0), backgroundColor:PALETTE.gold, borderRadius:5},
+      {label:'الفعلي', data:groups.map(g=>g.cost), backgroundColor:PALETTE.forest, borderRadius:5},
+    ], {rotate:opts.rotate||0, horizontal:opts.horizontal||false, onClickLabel:opts.onClickLabel});
+  }else{
+    const field = mode==='amount' ? 'cost' : (mode==='budget' ? 'budget' : 'count');
+    const label = mode==='amount' ? 'المبلغ الفعلي' : (mode==='budget' ? 'المبلغ التقديري' : 'عدد المشاركات');
+    makeBar(canvas, key+'Bar', groups.map(g=>g.label), [
+      {label, data:groups.map(g=>g[field]||0), backgroundColor:opts.colors||PAL_LIST, borderRadius:5},
+    ], {rotate:opts.rotate||0, horizontal:opts.horizontal||false, dataLabels:true,
+        override:{plugins:{legend:{display:false}}}, onClickLabel:opts.onClickLabel});
+  }
+}
+/* يرسم نسخة "دائري" ثابتة الشكل دائماً. وضع "التقديري" (البطولات والمعسكرات فقط) يعرض توزيع مبلغ الموازنة بدل الفعلي. */
+function renderModeDonut(canvas, key, mode, groups, opts={}){
+  if(!canvas || !groups.length) return;
+  const colors = opts.colors || PAL_LIST;
+  let data, centerLines;
+  if(mode==='amount'){
+    data = groups.map(g=>g.cost);
+    centerLines = [fmt(data.reduce((s,v)=>s+v,0)), 'ر.س — إجمالي الفعلي'];
+  }else if(mode==='budget'){
+    data = groups.map(g=>g.budget||0);
+    centerLines = [fmt(data.reduce((s,v)=>s+v,0)), 'ر.س — إجمالي التقديري'];
+  }else if(mode==='avg'){
+    data = groups.map(g=> g.actPlayers? g.cost/g.actPlayers : 0);
+    const avgAll = data.length? data.reduce((s,v)=>s+v,0)/data.length : 0;
+    centerLines = [fmt(avgAll), 'متوسط تكلفة اللاعب الفعلي'];
+  }else{
+    data = groups.map(g=>g.count);
+    centerLines = [fmt(data.reduce((s,v)=>s+v,0)), 'مشاركة'];
+  }
+  makeDonut(canvas, key+'Donut', groups.map(g=>g.label), data, colors, centerLines, {onClickLabel:opts.onClickLabel});
+}
+/* يبني قسم كامل: عنوان + لوحات جنباً إلى جنب (أعمدة ثابتة + دائري ثابت + تحقيق الميداليات اختيارياً)، وأزرار التبديل مكررة فوق اللوحتين الأوليين فتتحكم بهما معاً */
+function modeChartsBlockHTML(id, title, mode, {marginTop=14, labels=VIEW_MODE_LABELS, withMedals=false, extra=''}={}){
+  return `
+  <div class="section-title" style="margin-top:${marginTop}px;">
+    <div class="bar"></div><h2>${title}</h2>${extra}
+  </div>
+  <div class="${withMedals? 'grid3':'grid2'}">
+    <div class="panel">
+      <div class="panel-head">
+        عرض أعمدة
+        ${viewToggleHTML(id+'ToggleBar', mode, labels)}
+      </div>
+      <div class="panel-body"><div class="chart-box"><canvas id="${id}Bar"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        عرض دائري
+        ${viewToggleHTML(id+'ToggleDonut', mode, labels)}
+      </div>
+      <div class="panel-body"><div class="chart-box"><canvas id="${id}Donut"></canvas></div></div>
+    </div>
+    ${withMedals? `
+    <div class="panel">
+      <div class="panel-head">تحقيق الميداليات<small>فعلي مقابل متوقع — بطولات فقط</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="${id}Medals"></canvas></div></div>
+    </div>` : ''}
+  </div>`;
+}
+/* يربط أزرار القسم (المكررة فوق اللوحتين) بحالته، ويرسم النسخ معاً من نفس البيانات — يشمل لوحة تحقيق الميداليات تلقائياً إن وُجدت */
+function mountModeCharts(id, mode, groups, setModeFn, opts={}){
+  document.querySelectorAll('#'+id+'ToggleBar button, #'+id+'ToggleDonut button').forEach(b=> b.onclick = ()=> setModeFn(b.dataset.v));
+  renderModeBar($('#'+id+'Bar'), id, mode, groups, opts);
+  renderModeDonut($('#'+id+'Donut'), id, mode, groups, opts);
+  const medalsCanvas = $('#'+id+'Medals');
+  if(medalsCanvas) renderMedalsByGroup(medalsCanvas, id+'Medals', groups, opts);
+}
+
+/* ================= REUSABLE: جدول تفصيل كامل للمشاركات (بطولات/معسكرات) =================
+   يُستخدم في صفحة البطولات والمعسكرات، وتم تكراره أيضاً في صفحتي (الدول والمدن) و(تحليل الجنس والفئات). */
+function fullActivitiesTableHTML(acts, {title='تفصيل كامل للمشاركات', descSuffix=''}={}){
+  const rows = acts.map(a=>{
+    const fed = FEDMETA[a.fedId];
+    return `<tr>
+      <td>${fed? fed.nameAr : a.fedId}</td>
+      <td style="white-space:normal; min-width:220px;">${a.name}</td>
+      <td>${typeTag(a)}</td>
+      <td>${a.classification}</td>
+      <td>${a.country}</td>
+      <td>${a.city}</td>
+      <td>${genderTag(a.genderLabel)}</td>
+      <td>${a.partCat}</td>
+      <td>${fmt(a.days)}</td>
+      <td>${fmt(a.staff)}</td>
+      <td>${fmt(a.expPlayers)}</td>
+      <td>${fmt(a.actPlayers)}</td>
+      <td>${diffBadge(a.actPlayers-a.expPlayers)}</td>
+      <td>${a.hasMedals ? `${fmt(a.expGold||0)}/${fmt(a.actGold||0)}` : '—'}</td>
+      <td>${a.hasMedals ? `${fmt(a.expSilver||0)}/${fmt(a.actSilver||0)}` : '—'}</td>
+      <td>${a.hasMedals ? `${fmt(a.expBronze||0)}/${fmt(a.actBronze||0)}` : '—'}</td>
+      <td>${a.hasMedals ? diffBadge(a.medAct-a.medExp) : '—'}</td>
+      <td>${fmt(a.actualCost)}</td>
+      <td>${a.costPerActualPlayer!=null? fmt(a.costPerActualPlayer) : '—'}</td>
+      <td>${a.costPerExpectedPlayer!=null? fmt(a.costPerExpectedPlayer) : '—'}</td>
+    </tr>`;
+  }).join('');
+  return `
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-head">${title}<small>${fmt(acts.length)} مشاركة${descSuffix?' — '+descSuffix:''}</small></div>
+    <div class="table-wrap">
+      <table class="datatable">
+        <thead><tr>
+          <th>الاتحاد</th><th>اسم الفعالية</th><th>النوع</th><th>التصنيف</th><th>الدولة</th><th>المدينة</th>
+          <th>الجنس</th><th>الفئة</th><th>الأيام</th><th>الجهاز الفني</th>
+          <th>لاعبون متوقع</th><th>لاعبون فعلي</th><th>انحراف اللاعبين</th>
+          <th>ذهبية م/ف</th><th>فضية م/ف</th><th>برونزية م/ف</th><th>انحراف الميداليات</th>
+          <th>التكلفة الفعلية</th><th>تكلفة اللاعب الفعلي</th><th>تكلفة اللاعب التقديري</th>
+        </tr></thead>
+        <tbody>${rows || '<tr><td colspan="19" class="empty-state">لا توجد مشاركات مطابقة</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="note-line" style="padding:10px 16px;">م/ف = متوقع/فعلي. عدد المشاركات هنا هو عدد سجلات المشاركة الفعلية (Activities)، وليس عدد صفوف البيانات المالية.</div>
+  </div>`;
+}
+
+/* ================= FILTER UI ================= */
+function setLocal(key, val){
+  LOCAL[key] = (LOCAL[key]===val) ? "" : val;
+  renderPage();
+}
+function onGFChange(){ renderFiltersBar(); renderChips(); renderPage(); }
+function toggleGFValue(key, val){
+  const cur = GF[key].slice();
+  const i = cur.indexOf(val);
+  if(i>=0) cur.splice(i,1); else cur.push(val);
+  GF[key] = cur;
+  onGFChange();
+}
+function clearAll(){
+  Object.assign(GF, emptyGF());
+  clearLocal();
+  if(AUTH.role==='fed') GF.fed = [AUTH.fedId];
+  if(AUTH.role==='reviewer') GF.reviewer = [AUTH.reviewerName];
+  onGFChange();
+}
+function renderChips(){
+  const wrap = $("#chips"); wrap.innerHTML="";
+  const labels = {fed:'الاتحاد', size:'الحجم', quarter:'الربع', stream:'Stream', tier:'Tier', category:'Category',
+    username:'Username', password:'Password', reviewer:'Reviewer', country:'الدولة', city:'المدينة'};
+  Object.entries(GF).forEach(([k,arr])=>{
+    if(AUTH.role==='fed' && k==='fed') return; /* مقفول — لا يمكن إزالته */
+    if(AUTH.role==='reviewer' && k==='reviewer') return; /* مقفول — لا يمكن إزالته */
+    (arr||[]).forEach(v=>{
+      const c = document.createElement('div'); c.className='chip';
+      const label = k==='fed' ? (FEDMETA[v]?.nameAr || v) : v;
+      c.innerHTML = `${labels[k]||k}: ${label} <button>✕</button>`;
+      c.querySelector('button').onclick = ()=> toggleGFValue(k, v);
+      wrap.appendChild(c);
+    });
+  });
+}
+
+/* ---- عناصر واجهة قابلة لإعادة الاستخدام: قائمة اختيار متعدد (checkbox dropdown) وقائمة اختيار مفرد ---- */
+function msSummary(selectedArr, labelFn){
+  if(!selectedArr.length) return 'الكل';
+  if(selectedArr.length===1) return labelFn(selectedArr[0]);
+  return selectedArr.length+' محدد';
+}
+function multiSelectHTML(id, label, options, selectedArr, labelFn=(o=>o)){
+  return `<div class="f-group">
+    <label>${label}</label>
+    <div class="multiselect" id="${id}">
+      <button type="button" class="ms-btn"><span>${msSummary(selectedArr, labelFn)}</span><span class="ms-caret">▾</span></button>
+      <div class="ms-panel">
+        <label class="ms-opt strong"><input type="checkbox" data-all="1" ${!selectedArr.length?'checked':''}> الكل</label>
+        ${options.map(o=>`<label class="ms-opt"><input type="checkbox" data-v="${o}" ${selectedArr.includes(o)?'checked':''}> ${labelFn(o)}</label>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function wireMultiSelect(id, onToggle, onClear, {numeric=false}={}){
+  const root = document.getElementById(id);
+  if(!root) return;
+  root.querySelector('.ms-btn').onclick = (e)=>{
+    e.stopPropagation();
+    document.querySelectorAll('.multiselect.open').forEach(x=>{ if(x!==root) x.classList.remove('open'); });
+    root.classList.toggle('open');
+  };
+  root.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', (e)=>{
+      e.stopPropagation();
+      if(cb.dataset.all){ onClear(); }
+      else{ onToggle(numeric? Number(cb.dataset.v) : cb.dataset.v); }
+    });
+  });
+}
+function singleSelectHTML(id, options, selected){
+  return `<select id="${id}" class="control"><option value="">الكل</option>${options.map(o=>`<option value="${o}" ${selected===o?'selected':''}>${o}</option>`).join('')}</select>`;
+}
+function wireSingleSelect(id, onChange){
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('change', e=> onChange(e.target.value));
+}
+/* شجرة دولة → مدينة، من كامل البيانات (بدون فلترة) حتى تبقى كل الخيارات ظاهرة دوماً */
+function countryCityMap(){
+  const m = new Map();
+  ACT.forEach(a=>{
+    if(!m.has(a.country)) m.set(a.country, new Set());
+    m.get(a.country).add(a.city);
+  });
+  return [...m.entries()]
+    .map(([country,set])=>({country, cities:[...set].sort((x,y)=>x.localeCompare(y,'ar'))}))
+    .sort((a,b)=>a.country.localeCompare(b.country,'ar'));
+}
+function geoSummary(){
+  const parts=[];
+  if(GF.country.length) parts.push(GF.country.length+' دولة');
+  if(GF.city.length) parts.push(GF.city.length+' مدينة');
+  return parts.length? parts.join('، ') : 'الكل';
+}
+
+function renderFiltersBar(){
+  const wrap = $("#filtersDynamic");
+  if(!wrap) return;
+
+  const feds = FED.slice().sort((a,b)=>a.nameAr.localeCompare(b.nameAr,'ar'));
+  const sizes = [...new Set(FED.map(f=>f.size))].filter(Boolean).sort();
+  const streams = [...new Set(FED.map(f=>f.stream))].filter(Boolean).sort();
+  const tiers = [...new Set(FED.map(f=>f.tier))].filter(Boolean).sort();
+  const categories = [...new Set(FED.map(f=>f.category))].filter(Boolean).sort();
+  const reviewers = [...new Set(FED.map(f=>f.reviewer))].filter(Boolean).sort();
+
+  wrap.innerHTML = `
+    ${AUTH.role==='fed' ? '' : multiSelectHTML('fFed', 'الاتحاد', feds.map(f=>f.id), GF.fed, id=> (FEDMETA[id]?.nameAr || id))}
+    <div class="f-group"><label>حجم الاتحاد</label>${singleSelectHTML('fSize', sizes, GF.size[0]||'')}</div>
+    ${multiSelectHTML('fQuarter', 'الربع المالي', QUARTER_ORDER, GF.quarter)}
+    ${streams.length? `<div class="f-group"><label>Stream</label>${singleSelectHTML('fStream', streams, GF.stream[0]||'')}</div>` : ''}
+    ${tiers.length? `<div class="f-group"><label>Tier</label>${singleSelectHTML('fTier', tiers, GF.tier[0]||'')}</div>` : ''}
+    ${categories.length? `<div class="f-group"><label>Category</label>${singleSelectHTML('fCategory', categories, GF.category[0]||'')}</div>` : ''}
+    ${(reviewers.length && AUTH.role!=='reviewer')? `<div class="f-group"><label>Reviewer</label>${singleSelectHTML('fReviewer', reviewers, GF.reviewer[0]||'')}</div>` : ''}
+  `;
+
+  if(AUTH.role!=='fed') wireMultiSelect('fFed', v=> toggleGFValue('fed', v), ()=>{ GF.fed=[]; onGFChange(); }, {numeric:true});
+  wireMultiSelect('fQuarter', v=> toggleGFValue('quarter', v), ()=>{ GF.quarter=[]; onGFChange(); });
+  wireSingleSelect('fSize', v=>{ GF.size = v? [v] : []; onGFChange(); });
+  wireSingleSelect('fStream', v=>{ GF.stream = v? [v] : []; onGFChange(); });
+  wireSingleSelect('fTier', v=>{ GF.tier = v? [v] : []; onGFChange(); });
+  wireSingleSelect('fCategory', v=>{ GF.category = v? [v] : []; onGFChange(); });
+  if(AUTH.role!=='reviewer') wireSingleSelect('fReviewer', v=>{ GF.reviewer = v? [v] : []; onGFChange(); });
+}
+document.addEventListener('click', (e)=>{
+  document.querySelectorAll('.multiselect.open').forEach(ms=>{ if(!ms.contains(e.target)) ms.classList.remove('open'); });
+});
+
+/* ---- شجرة الدولة/المدينة (اختيار متعدد) — تظهر ضمن صف الفلاتر السريعة (نوع الفعالية/التصنيف/الجنس) في كل صفحة ---- */
+function geoTreeFilterHTML(id){
+  const geo = countryCityMap();
+  return `<div class="f-group">
+    <label>الدولة / المدينة</label>
+    <div class="multiselect geo-tree" id="${id}">
+      <button type="button" class="ms-btn"><span>${geoSummary()}</span><span class="ms-caret">▾</span></button>
+      <div class="ms-panel">
+        ${geo.map(g=>`
+          <div class="geo-country">
+            <label class="ms-opt strong"><input type="checkbox" data-country="${g.country}" ${GF.country.includes(g.country)?'checked':''}> ${g.country}</label>
+            <div class="geo-cities">
+              ${g.cities.map(c=>`<label class="ms-opt sub"><input type="checkbox" data-country="${g.country}" data-city="${c}" ${GF.city.includes(c)?'checked':''}> ${c}</label>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function wireGeoTreeFilter(id){
+  const geoRoot = document.getElementById(id);
+  if(!geoRoot) return;
+  geoRoot.querySelector('.ms-btn').onclick = (e)=>{
+    e.stopPropagation();
+    document.querySelectorAll('.multiselect.open').forEach(x=>{ if(x!==geoRoot) x.classList.remove('open'); });
+    geoRoot.classList.toggle('open');
+  };
+  geoRoot.querySelectorAll('input[data-city]').forEach(cb=>{
+    cb.addEventListener('change', (e)=>{ e.stopPropagation(); toggleGFValue('city', cb.dataset.city); });
+  });
+  geoRoot.querySelectorAll('input[data-country]:not([data-city])').forEach(cb=>{
+    cb.addEventListener('change', (e)=>{ e.stopPropagation(); toggleGFValue('country', cb.dataset.country); });
+  });
+}
+
+/* ---- فلاتر مشتركة (نوع الفعالية / التصنيف / الجنس) — تُستخدم في البطولات والمعسكرات، الدول والمدن، وتحليل الفئات ---- */
+function activityFiltersHTML(){
+  const classes = [...new Set(ACT.map(a=>a.classification))].sort();
+  const partCats = [...new Set(ACT.map(a=>a.partCat))].sort();
+  return `
+  <div class="filters" style="padding:0 0 14px;">
+    <div class="f-group"><label>نوع الفعالية</label>
+      <div class="seg" id="evType">
+        <button data-v="" class="${LOCAL.type===''?'active':''}">الكل</button>
+        <button data-v="tournament" class="${LOCAL.type==='tournament'?'active':''}">بطولات فقط</button>
+        <button data-v="camp" class="${LOCAL.type==='camp'?'active':''}">معسكرات فقط</button>
+      </div>
+    </div>
+    <div class="f-group"><label>التصنيف</label>
+      <div class="seg" id="evClass">
+        <button data-v="" class="${LOCAL.classification===''?'active':''}">الكل</button>
+        ${classes.map(c=>`<button data-v="${c}" class="${LOCAL.classification===c?'active':''}">${c}</button>`).join('')}
+      </div>
+    </div>
+    <div class="f-group"><label>الجنس</label>
+      <div class="seg" id="evGender">
+        <button data-v="" class="${LOCAL.gender===''?'active':''}">الكل</button>
+        <button data-v="رجال" class="${LOCAL.gender==='رجال'?'active':''}">رجال</button>
+        <button data-v="نساء" class="${LOCAL.gender==='نساء'?'active':''}">نساء</button>
+      </div>
+    </div>
+    <div class="f-group"><label>فئة المشاركة</label>
+      <div class="seg" id="evPartCat">
+        <button data-v="" class="${LOCAL.partCat===''?'active':''}">الكل</button>
+        ${partCats.map(c=>`<button data-v="${c}" class="${LOCAL.partCat===c?'active':''}">${c}</button>`).join('')}
+      </div>
+    </div>
+    ${geoTreeFilterHTML('evGeoTree')}
+  </div>`;
+}
+function wireActivityFilters(){
+  document.querySelectorAll('#evType button').forEach(b=> b.onclick = ()=> setLocal('type', b.dataset.v));
+  document.querySelectorAll('#evClass button').forEach(b=> b.onclick = ()=> setLocal('classification', b.dataset.v));
+  document.querySelectorAll('#evGender button').forEach(b=> b.onclick = ()=> setLocal('gender', b.dataset.v));
+  document.querySelectorAll('#evPartCat button').forEach(b=> b.onclick = ()=> setLocal('partCat', b.dataset.v));
+  wireGeoTreeFilter('evGeoTree');
+}
+
+/* ================= NAV ================= */
+const PAGES = [
+  {id:'overview', label:'نظرة عامة'},
+  {id:'expenses', label:'تحليل المصاريف'},
+  {id:'events', label:'البطولات والمعسكرات'},
+  {id:'gender', label:'تحليل الفئات'},
+  {id:'geo', label:'الدول والمدن'},
+  {id:'federations', label:'الاتحادات'},
+];
+let activePage = 'overview';
+function initTabs(){
+  const wrap = $("#tabs"); wrap.innerHTML = "";
+  const pages = PAGES.filter(p=> !(AUTH.role==='fed' && p.id==='federations'));
+  if(AUTH.role==='fed' && activePage==='federations') activePage='overview';
+  pages.forEach(p=>{
+    const b = document.createElement('button'); b.textContent=p.label; b.dataset.id=p.id;
+    if(p.id===activePage) b.classList.add('active');
+    b.addEventListener('click', ()=> goToPage(p.id));
+    wrap.appendChild(b);
+  });
+}
+function goToPage(id){
+  activePage = id; clearLocal();
+  document.querySelectorAll('#tabs button').forEach(b=> b.classList.toggle('active', b.dataset.id===id));
+  renderPage();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ================= CHART HELPERS ================= */
+const centerTextPlugin = {
+  id:'centerText',
+  afterDraw(chart){
+    const lines = chart.config._centerLines;
+    if(!lines || !lines.length) return;
+    const {ctx, chartArea:{left,right,top,bottom}} = chart;
+    const cx = (left+right)/2, cy = (top+bottom)/2;
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    const sizes  = [16, 10.5, 10.5];
+    const colors = [PALETTE.forest, '#8a9790', '#8a9790'];
+    const weights = ['800','600','600'];
+    const lineH = 15;
+    const startY = cy - ((lines.length-1)*lineH)/2;
+    lines.forEach((txt,i)=>{
+      ctx.font = `${weights[i]||'600'} ${sizes[i]||10}px 'Cairo', sans-serif`;
+      ctx.fillStyle = colors[i]||'#8a9790';
+      ctx.fillText(txt, cx, startY + i*lineH);
+    });
+    ctx.restore();
+  }
+};
+const sliceLabelPlugin = {
+  id:'sliceLabel',
+  afterDraw(chart){
+    if(chart.config.type!=='doughnut') return;
+    const meta = chart.getDatasetMeta(0);
+    if(!meta || !meta.data || !meta.data.length) return;
+    const values = chart.data.datasets[0].data;
+    const total = values.reduce((a,b)=>a+(b||0),0);
+    if(!total) return;
+    const {ctx} = chart;
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    meta.data.forEach((arc,i)=>{
+      const v = values[i]||0;
+      const pct = v/total*100;
+      if(pct < 4) return;
+      const props = arc.getProps ? arc.getProps(['startAngle','endAngle','innerRadius','outerRadius','x','y'], true) : arc;
+      const mid = (props.startAngle+props.endAngle)/2;
+      const r = (props.innerRadius+props.outerRadius)/2;
+      const x = props.x + Math.cos(mid)*r;
+      const y = props.y + Math.sin(mid)*r;
+      ctx.font = "800 11.5px 'Cairo', sans-serif";
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 3;
+      ctx.fillText(pct.toFixed(0)+'٪', x, y);
+    });
+    ctx.restore();
+  }
+};
+/* draws the value on top of each bar — used when opts.dataLabels is true in makeBar.
+   opts.centerLabels (stacked bars): draws the label centered *inside* the segment in white, instead of beside the bar tip. */
+const barValueLabelPlugin = {
+  id:'barValueLabel',
+  afterDatasetsDraw(chart){
+    if(!chart.config._showValueLabels) return;
+    const {ctx} = chart;
+    const horizontal = chart.options.indexAxis==='y';
+    const centered = !!chart.config._centerLabels;
+    ctx.save();
+    ctx.font = "800 10.2px 'Cairo', sans-serif";
+    chart.data.datasets.forEach((ds, dsIndex)=>{
+      const meta = chart.getDatasetMeta(dsIndex);
+      if(meta.hidden) return;
+      meta.data.forEach((bar,i)=>{
+        const val = ds.data[i];
+        if(val==null) return;
+        const pos = bar.tooltipPosition ? bar.tooltipPosition() : {x:bar.x,y:bar.y};
+        if(centered && horizontal){
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText((chart.config._labelFmt? chart.config._labelFmt(val,dsIndex,i):fmt(val)), pos.x, pos.y);
+        }else if(horizontal){
+          ctx.fillStyle = '#3a4a41';
+          ctx.textAlign='left'; ctx.textBaseline='middle';
+          ctx.fillText((chart.config._labelFmt? chart.config._labelFmt(val,dsIndex,i):fmt(val)), pos.x+6, pos.y);
+        }else{
+          ctx.fillStyle = '#3a4a41';
+          ctx.textAlign='center'; ctx.textBaseline='bottom';
+          ctx.fillText((chart.config._labelFmt? chart.config._labelFmt(val,dsIndex,i):fmt(val)), pos.x, pos.y-5);
+        }
+      });
+    });
+    ctx.restore();
+  }
+};
+Chart.register(centerTextPlugin, sliceLabelPlugin, barValueLabelPlugin);
+
+function makeBar(ctx, key, labels, datasets, opts={}){
+  destroyChart(key);
+  const chart = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets},
+    options:Object.assign({
+      responsive:true, maintainAspectRatio:false,
+      indexAxis: opts.horizontal ? 'y' : 'x',
+      layout: opts.dataLabels ? {padding:{top:18}} : undefined,
+      onClick:(evt,els)=>{ if(els.length && opts.onClickLabel){ opts.onClickLabel(labels[els[0].index]); } },
+      scales:{
+        x:{grid:{display:!opts.horizontal}, ticks:{font:{size:10.5}, autoSkip:false, maxRotation:opts.rotate||0}, stacked:!!opts.stacked},
+        y:{grid:{color:'#eee7d3'}, stacked:!!opts.stacked}
+      },
+      plugins:{legend:{display: (datasets.length>1), position:'bottom', labels:{boxWidth:11, font:{size:11}}}}
+    }, opts.override||{})
+  });
+  chart.config._showValueLabels = !!opts.dataLabels;
+  chart.config._labelFmt = opts.labelFmt || null;
+  chart.config._centerLabels = !!opts.centerLabels;
+  charts[key] = chart;
+  chart.update();
+}
+function makeDonut(ctx, key, labels, data, colors, centerLines, opts={}){
+  destroyChart(key);
+  const cfg = {
+    type:'doughnut',
+    data:{labels, datasets:[{data, backgroundColor:colors, borderWidth:2, borderColor:'#fff'}]},
+    options:Object.assign({
+      responsive:true, maintainAspectRatio:false, cutout:'68%',
+      onClick:(evt,els)=>{ if(els.length && opts.onClickLabel){ opts.onClickLabel(labels[els[0].index]); } },
+      plugins:{legend:{position:'bottom', labels:{boxWidth:11, font:{size:10.5}, padding:10}}}
+    }, opts.override||{})
+  };
+  const chart = new Chart(ctx, cfg);
+  chart.config._centerLines = centerLines || [];
+  charts[key] = chart;
+  chart.update();
+}
+function makeLine(ctx, key, labels, datasets, opts={}){
+  destroyChart(key);
+  charts[key] = new Chart(ctx, {
+    type:'line',
+    data:{labels, datasets},
+    options:Object.assign({
+      responsive:true, maintainAspectRatio:false,
+      scales:{x:{grid:{display:false}}, y:{grid:{color:'#eee7d3'}}},
+      plugins:{legend:{position:'bottom', labels:{boxWidth:11, font:{size:11}}}}
+    }, opts.override||{})
+  });
+}
+
+/* ================= PAGE DISPATCH ================= */
+function renderPage(){
+  if(AUTH.role==='fed' && activePage==='federations') activePage='overview';
+  const page = $("#page");
+  let html = "";
+  switch(activePage){
+    case 'overview': html = pageOverview(); break;
+    case 'expenses': html = pageExpenses(); break;
+    case 'events': html = pageEvents(); break;
+    case 'gender': html = pageGender(); break;
+    case 'geo': html = pageGeo(); break;
+    case 'federations': html = pageFederations(); break;
+    default: html = '<div class="empty-state">لا توجد بيانات</div>';
+  }
+  page.innerHTML = html;
+  requestAnimationFrame(()=>{
+    switch(activePage){
+      case 'overview': mountOverview(); break;
+      case 'expenses': mountExpenses(); break;
+      case 'events': mountEvents(); break;
+      case 'gender': mountGender(); break;
+      case 'geo': mountGeo(); break;
+      case 'federations': mountFederations(); break;
+    }
+  });
+}
+
+/* helper: section title */
+function sectionTitle(title, desc=''){
+  return `<div class="section-title"><div class="bar"></div><h2>${title}</h2>${desc?`<span class="desc">${desc}</span>`:''}</div>`;
+}
+function kpi(label, value, sub='', cls=''){
+  return `<div class="kpi ${cls}"><div class="label">${label}</div><div class="value">${value}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+}
+
+/* ================= OVERVIEW PAGE ================= */
+let OV_L2_MODE = 'actual'; /* actual | budget */
+function setOvL2Mode(v){ OV_L2_MODE=v; renderPage(); }
+
+function pageOverview(){
+  const fin = finRows();
+  const {actual, budget, diff} = sumFin(fin);
+  const acts = actRows(null, false);
+  const tPlayersExp = acts.reduce((s,a)=>s+a.expPlayers,0);
+  const tPlayersAct = acts.reduce((s,a)=>s+a.actPlayers,0);
+  const tourns = acts.filter(a=>a.isTournament);
+  const camps = acts.filter(a=>a.isCamp);
+  const medExp = tourns.reduce((s,a)=>s+(a.medExp||0),0);
+  const medAct = tourns.reduce((s,a)=>s+(a.medAct||0),0);
+  const staffTotal = acts.reduce((s,a)=>s+a.staff,0);
+  const male = acts.filter(a=>a.genderLabel==='رجال').reduce((s,a)=>s+a.actPlayers,0);
+  const female = acts.filter(a=>a.genderLabel==='نساء').reduce((s,a)=>s+a.actPlayers,0);
+  const genderTotal = male+female;
+  const nCountries = new Set(acts.map(a=>a.country)).size;
+  const nCities = new Set(acts.map(a=>a.city)).size;
+  const nFeds = new Set(acts.map(a=>a.fedId)).size || (GF.fed.length ? GF.fed.length : FED.length);
+
+  const diffPlayers = tPlayersAct-tPlayersExp;
+  const diffMedals = medAct-medExp;
+
+  /* tournaments-only cost per player — actual & estimated, amounts only */
+  const tournCost = tourns.reduce((s,a)=>s+a.actualCost,0);
+  const tournActP = tourns.reduce((s,a)=>s+a.actPlayers,0);
+  const tournExpP = tourns.reduce((s,a)=>s+a.expPlayers,0);
+  const costPerActualPlayerT = tournActP? tournCost/tournActP : null;
+  const costPerExpectedPlayerT = tournExpP? tournCost/tournExpP : null;
+
+  return `
+  ${sectionTitle('نظرة عامة على الأداء المالي والتشغيلي', 'ملخص شامل وفق الفلاتر المُختارة أعلى الصفحة')}
+
+  <div class="grid3">
+    <div class="cat-card" style="border-top:3px solid var(--forest);">
+      <h4>💰 الفعلي</h4>
+      <div class="cat-row"><span>المبلغ الفعلي</span><b>${fmt(actual)}</b></div>
+      <div class="cat-row"><span>اللاعبون الفعليون</span><b>${fmt(tPlayersAct)}</b></div>
+      <div class="cat-row"><span>الميداليات الفعلية</span><b>${fmt(medAct)}</b></div>
+      <div class="cat-row"><span>متوسط تكلفة اللاعب الفعلي (بطولات فقط)</span><b>${costPerActualPlayerT!=null? fmt(costPerActualPlayerT):'—'}</b></div>
+      <span class="pill" style="background:var(--mint-soft); color:var(--forest);">بطولات فقط للميداليات والمتوسط</span>
+    </div>
+    <div class="cat-card" style="border-top:3px solid var(--gold);">
+      <h4>🎯 التقديري (الموازنة)</h4>
+      <div class="cat-row"><span>المبلغ التقديري</span><b>${fmt(budget)}</b></div>
+      <div class="cat-row"><span>اللاعبون المتوقعون</span><b>${fmt(tPlayersExp)}</b></div>
+      <div class="cat-row"><span>الميداليات المتوقعة</span><b>${fmt(medExp)}</b></div>
+      <div class="cat-row"><span>متوسط تكلفة اللاعب التقديري (بطولات فقط)</span><b>${costPerExpectedPlayerT!=null? fmt(costPerExpectedPlayerT):'—'}</b></div>
+      <span class="pill" style="background:var(--gold-soft); color:#8c6d2f;">بطولات فقط للميداليات والمتوسط</span>
+    </div>
+    <div class="cat-card" style="border-top:3px solid ${diff>0?'var(--red)':'var(--green)'};">
+      <h4>📊 الانحراف (الفعلي − التقديري)</h4>
+      <div class="cat-row"><span>فرق المبلغ</span><b>${diffBadge(diff)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(actual,budget)}</span></b></div>
+      <div class="cat-row"><span>فرق اللاعبين</span><b>${diffBadge(diffPlayers)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(tPlayersAct,tPlayersExp)}</span></b></div>
+      <div class="cat-row"><span>فرق الميداليات</span><b>${diffBadge(diffMedals)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(medAct,medExp)}</span></b></div>
+    </div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr); margin-top:14px;">
+    ${kpi('الجهاز الفني والإداري', fmt(staffTotal), 'إجمالي عبر '+fmt(acts.length)+' فعالية', 'blue')}
+    ${kpi('عدد الفعاليات', fmt(acts.length), fmt(tourns.length)+' بطولة، '+fmt(camps.length)+' معسكر', 'warn')}
+    ${kpi('عدد الاتحادات / الدول / المدن', fmt(nFeds)+' / '+fmt(nCountries)+' / '+fmt(nCities))}
+    ${kpi('نسبة الذكور / الإناث', (genderTotal? pctStr(male/genderTotal*100):'—')+' / '+(genderTotal? pctStr(female/genderTotal*100):'—'), 'من إجمالي اللاعبين الفعليين', 'accent')}
+  </div>
+
+  <div class="grid2" style="margin-top:14px;">
+    <div class="panel">
+      <div class="panel-head">الصرف الفعلي مقابل الموازنة<small>إجمالي</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chOvBudget"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">تحليل الاتجاه الربعي — فعلي مقابل موازنة<small>حسب الربع المالي</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chOvQuarter"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:14px;">
+    <div class="panel">
+      <div class="panel-head">الاتجاه الربعي<small>فعلي / موازنة</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chOvQuarterLine"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        التوزيع حسب النوع (فني / تشغيلي) — المستوى الثاني
+        <div class="mini-seg" id="ovL2Toggle">
+          <button data-v="actual" class="${OV_L2_MODE==='actual'?'active':''}">فعلي</button>
+          <button data-v="budget" class="${OV_L2_MODE==='budget'?'active':''}">موازنة</button>
+        </div>
+      </div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chOvL2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:14px;">
+    <div class="panel">
+      <div class="panel-head">نسبة اللاعبين حسب الجنس (الفعلي)<small>${genderTotal?fmt(genderTotal)+' لاعب/ة':'—'}</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chOvGender"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">الميداليات: متوقع مقابل فعلي<small>البطولات فقط</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chOvMedals"></canvas></div></div>
+    </div>
+  </div>
+  `;
+}
+function mountOverview(){
+  const fin = finRows();
+  const {actual, budget} = sumFin(fin);
+  const acts = actRows(null, false);
+
+  document.querySelectorAll('#ovL2Toggle button').forEach(b=> b.onclick = ()=> setOvL2Mode(b.dataset.v));
+
+  const cL2 = $("#chOvL2");
+  if(cL2){
+    const byL2 = groupSumFin(fin, r=>r.level2);
+    const labels = [...byL2.keys()];
+    const data = OV_L2_MODE==='actual' ? labels.map(l=>byL2.get(l).actual) : labels.map(l=>byL2.get(l).budget);
+    const total = data.reduce((s,v)=>s+v,0);
+    makeDonut(cL2, 'ovL2', labels, data, [PALETTE.forest, PALETTE.emerald, PALETTE.gold, PALETTE.navy],
+      [fmt(total), OV_L2_MODE==='actual'?'إجمالي الفعلي':'إجمالي الموازنة']);
+  }
+
+  const c1 = $("#chOvBudget");
+  if(c1){
+    makeBar(c1, 'ovBudget', ['فعلي','موازنة'], [
+      {label:'المبلغ', data:[actual, budget], backgroundColor:[PALETTE.forest, PALETTE.gold], borderRadius:6, barThickness:90},
+    ], {dataLabels:true, override:{plugins:{legend:{display:false}}}});
+  }
+
+  const c2 = $("#chOvQuarter");
+  if(c2){
+    const byQ = QUARTER_ORDER.map(q=> sumFin(fin.filter(r=>r.quarter===q)));
+    makeBar(c2, 'ovQuarter', QUARTER_ORDER, [
+      {label:'فعلي', data:byQ.map(o=>o.actual), backgroundColor:PALETTE.forest, borderRadius:5},
+      {label:'موازنة', data:byQ.map(o=>o.budget), backgroundColor:PALETTE.gold, borderRadius:5},
+    ]);
+  }
+
+  const cQL = $("#chOvQuarterLine");
+  if(cQL){
+    const byQ = QUARTER_ORDER.map(q=> sumFin(fin.filter(r=>r.quarter===q)));
+    makeLine(cQL, 'ovQuarterLine', QUARTER_ORDER, [
+      {label:'فعلي', data:byQ.map(o=>o.actual), borderColor:PALETTE.forest, backgroundColor:'rgba(15,47,33,.14)', fill:true, tension:.35, pointBackgroundColor:PALETTE.forest, pointRadius:4, borderWidth:2.5},
+      {label:'موازنة', data:byQ.map(o=>o.budget), borderColor:PALETTE.gold, backgroundColor:'rgba(198,161,91,0)', fill:false, tension:.35, pointBackgroundColor:PALETTE.gold, pointRadius:4, borderWidth:2.5},
+    ]);
+  }
+
+  const c3 = $("#chOvGender");
+  if(c3){
+    const male = acts.filter(a=>a.genderLabel==='رجال').reduce((s,a)=>s+a.actPlayers,0);
+    const female = acts.filter(a=>a.genderLabel==='نساء').reduce((s,a)=>s+a.actPlayers,0);
+    const na = acts.filter(a=>a.genderLabel==='غير محدد').reduce((s,a)=>s+a.actPlayers,0);
+    const labels=['رجال','نساء']; const data=[male,female]; const cols=[PALETTE.navy, PALETTE.pink];
+    if(na>0){ labels.push('غير محدد'); data.push(na); cols.push('#c9c2ab'); }
+    makeDonut(c3, 'ovGender', labels, data, cols, [fmt(male+female+na), 'إجمالي اللاعبين الفعليين']);
+  }
+
+  const c4 = $("#chOvMedals");
+  if(c4){
+    const tourns = acts.filter(a=>a.isTournament);
+    const g = [tourns.reduce((s,a)=>s+(a.expGold||0),0), tourns.reduce((s,a)=>s+(a.actGold||0),0)];
+    const s = [tourns.reduce((s2,a)=>s2+(a.expSilver||0),0), tourns.reduce((s2,a)=>s2+(a.actSilver||0),0)];
+    const b = [tourns.reduce((s2,a)=>s2+(a.expBronze||0),0), tourns.reduce((s2,a)=>s2+(a.actBronze||0),0)];
+    makeBar(c4, 'ovMedals', ['ذهبية','فضية','برونزية'], [
+      {label:'متوقع', data:[g[0],s[0],b[0]], backgroundColor:'#d8cba0', borderRadius:5},
+      {label:'فعلي', data:[g[1],s[1],b[1]], backgroundColor:[PALETTE.goldmed,PALETTE.silvermed,PALETTE.bronzemed], borderRadius:5},
+    ]);
+  }
+}
+
+/* ================= EXPENSES PAGE ================= */
+function pageExpenses(){
+  const finBase = finRows();
+  const fin = finBase.filter(r=> (!LOCAL.level2 || r.level2===LOCAL.level2) && (!LOCAL.level4 || r.level4===LOCAL.level4));
+  const {actual, budget, diff} = sumFin(fin);
+  const byL2 = groupSumFin(finBase, r=>r.level2);
+  const byL4 = mapToSorted(groupSumFin(finBase.filter(r=> !LOCAL.level2 || r.level2===LOCAL.level2), r=>r.level4));
+  const byL5 = mapToSorted(groupSumFin(fin, r=>r.level5));
+
+  const rowsL5 = byL5.map(([k,o])=>`
+    <tr>
+      <td>${k}</td>
+      <td>${fmt(o.actual)}</td>
+      <td>${fmt(o.budget)}</td>
+      <td>${diffBadge(o.actual-o.budget)}</td>
+      <td>${diffBadgePct(o.actual,o.budget)}</td>
+    </tr>`).join('');
+
+  return `
+  ${sectionTitle('تحليل المصاريف التفصيلي', 'فعلي مقابل موازنة على جميع المستويات — بدون حد أقصى للسجلات')}
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+    ${kpi('إجمالي الفعلي', fmtSAR(actual), '', 'accent')}
+    ${kpi('إجمالي الموازنة', fmtSAR(budget), '', 'gold')}
+    ${kpi('الانحراف', diffBadge(diff), diff>=0?'تجاوز الموازنة':'أقل من الموازنة')}
+    ${kpi('نسبة الانحراف', diffBadgePct(actual,budget))}
+  </div>
+
+  <div class="section-title">
+    <div class="bar"></div><h2>بطاقات فني / تشغيلي</h2>
+    <span class="desc">${LOCAL.level2? 'مُفلتر على: '+LOCAL.level2+' — انقر على البطاقة مجدداً لإلغاء الفلترة' : 'انقر على أي بطاقة لتفعيل فلترة المستوى الرابع والخامس أدناه — لا تشمل بيانات اللاعبين أو متوسط المشاركات، فهذه بيانات مالية بحتة'}</span>
+  </div>
+  <div class="grid2">
+    ${[...byL2.keys()].map(k=>{
+      const o = byL2.get(k);
+      const diffL2 = o.actual - o.budget;
+      const pct = actual? (o.actual/actual*100) : null;
+      const active = LOCAL.level2===k;
+      return `<div class="cat-card ${active?'active-card':''}" data-level2="${k}" style="cursor:pointer;">
+        <h4>${k}</h4>
+        <div class="cat-row"><span>الفعلي</span><b>${fmt(o.actual)}</b></div>
+        <div class="cat-row"><span>الموازنة</span><b>${fmt(o.budget)}</b></div>
+        <div class="cat-row"><span>الانحراف</span><b>${diffBadge(diffL2)}</b></div>
+        <div class="cat-row"><span>% من إجمالي الفعلي</span><b>${pct!=null? pctStr(pct):'—'}</b></div>
+      </div>`;
+    }).join('') || '<div class="empty-state">لا توجد بيانات</div>'}
+  </div>
+
+  <div class="grid2" style="margin-top:14px;">
+    <div class="panel">
+      <div class="panel-head">فني مقابل تشغيلي<small>فعلي / موازنة</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chExpL2"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">الاتجاه الربعي<small>فعلي / موازنة</small></div>
+      <div class="panel-body"><div class="chart-box"><canvas id="chExpQuarter"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:14px;">
+    <div class="panel">
+      <div class="panel-head">أبواب الصرف الرئيسية (المستوى الرابع)<small>${LOCAL.level4? 'مُفلتر على: '+LOCAL.level4 : 'مرتبة تنازلياً حسب الفعلي — انقر لفلترة المستوى الخامس'}</small></div>
+      <div class="panel-body"><div class="chart-box lg"><canvas id="chExpL4"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">تفصيل بنود الصرف (المستوى الخامس)<small>${(LOCAL.level2||LOCAL.level4)? 'مُفلتر حسب الاختيار أعلاه' : 'أعلى 15 بند'}</small></div>
+      <div class="panel-body"><div class="chart-box lg"><canvas id="chExpL5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-head">تفصيل بنود الصرف (المستوى الخامس)<small>${fmt(byL5.length)} بند${(LOCAL.level2||LOCAL.level4)? ' — مُفلتر':''}</small></div>
+    <div class="table-wrap">
+      <table class="datatable">
+        <thead><tr><th>البند</th><th>الفعلي</th><th>الموازنة</th><th>الانحراف</th><th>النسبة</th></tr></thead>
+        <tbody>${rowsL5 || '<tr><td colspan="5" class="empty-state">لا توجد بيانات</td></tr>'}</tbody>
+      </table>
+    </div>
+  </div>
+  `;
+}
+function mountExpenses(){
+  const finBase = finRows();
+  const fin = finBase.filter(r=> (!LOCAL.level2 || r.level2===LOCAL.level2) && (!LOCAL.level4 || r.level4===LOCAL.level4));
+  const byL2 = groupSumFin(finBase, r=>r.level2);
+
+  document.querySelectorAll('[data-level2]').forEach(el=>{
+    el.addEventListener('click', ()=> setLocal('level2', el.dataset.level2));
+  });
+
+  const c1 = $("#chExpL2");
+  if(c1){
+    const labels = [...byL2.keys()];
+    makeBar(c1, 'expL2', labels, [
+      {label:'فعلي', data:labels.map(l=>byL2.get(l).actual), backgroundColor:PALETTE.forest, borderRadius:5},
+      {label:'موازنة', data:labels.map(l=>byL2.get(l).budget), backgroundColor:PALETTE.gold, borderRadius:5},
+    ], {onClickLabel:(l)=> setLocal('level2', l), dataLabels:true});
+  }
+
+  const c2 = $("#chExpQuarter");
+  if(c2){
+    const byQ = QUARTER_ORDER.map(q=> sumFin(fin.filter(r=>r.quarter===q)));
+    makeLine(c2, 'expQuarter', QUARTER_ORDER, [
+      {label:'فعلي', data:byQ.map(o=>o.actual), borderColor:PALETTE.forest, backgroundColor:'rgba(15,47,33,.12)', fill:true, tension:.3},
+      {label:'موازنة', data:byQ.map(o=>o.budget), borderColor:PALETTE.gold, backgroundColor:'rgba(198,161,91,.12)', fill:true, tension:.3},
+    ]);
+  }
+
+  const c3 = $("#chExpL4");
+  if(c3){
+    const finForL4 = finBase.filter(r=> !LOCAL.level2 || r.level2===LOCAL.level2);
+    const byL4 = mapToSorted(groupSumFin(finForL4, r=>r.level4)).slice(0,15);
+    const labels = byL4.map(([k])=>k);
+    makeBar(c3, 'expL4', labels, [
+      {label:'فعلي', data:byL4.map(([,o])=>o.actual), backgroundColor:PALETTE.emerald, borderRadius:4},
+      {label:'موازنة', data:byL4.map(([,o])=>o.budget), backgroundColor:PALETTE.sand, borderRadius:4},
+    ], {horizontal:true, onClickLabel:(l)=> setLocal('level4', l)});
+  }
+
+  const c4 = $("#chExpL5");
+  if(c4){
+    const byL5b = mapToSorted(groupSumFin(fin, r=>r.level5)).slice(0,15);
+    const labels = byL5b.map(([k])=>k);
+    makeBar(c4, 'expL5', labels, [
+      {label:'فعلي', data:byL5b.map(([,o])=>o.actual), backgroundColor:PALETTE.navy, borderRadius:4},
+      {label:'موازنة', data:byL5b.map(([,o])=>o.budget), backgroundColor:PALETTE.sand, borderRadius:4},
+    ], {horizontal:true});
+  }
+}
+
+/* ================= EVENTS PAGE (tournaments & camps) ================= */
+let EVENTS_VIEW_MODE = 'amount'; /* count | avg | amount | budget — موحّد بين البطولات والمعسكرات */
+function setEventsViewMode(v){ EVENTS_VIEW_MODE=v; renderPage(); }
+let EV_PLAYERS_MODE = 'actual'; /* actual | avg — لرسم تكلفة اللاعب حسب الفعالية */
+function setEvPlayersMode(v){ EV_PLAYERS_MODE=v; renderPage(); }
+
+function pageEvents(){
+  const acts = actRows();
+  const tourns = acts.filter(a=>a.isTournament);
+  const camps = acts.filter(a=>a.isCamp);
+
+  const expP = acts.reduce((s,a)=>s+a.expPlayers,0);
+  const actP = acts.reduce((s,a)=>s+a.actPlayers,0);
+  const medExp = tourns.reduce((s,a)=>s+(a.medExp||0),0);
+  const medAct = tourns.reduce((s,a)=>s+(a.medAct||0),0);
+  const totalCost = acts.reduce((s,a)=>s+a.actualCost,0);
+  const avgCostActual = actP>0 ? totalCost/actP : null;
+  const avgCostExpected = expP>0 ? totalCost/expP : null;
+
+  return `
+  ${sectionTitle('البطولات والمعسكرات', 'المشاركات، اللاعبون، الميداليات، ومتوسط التكلفة للاعب — مرتبطة عبر Activities ID بالبيانات المالية')}
+
+  ${activityFiltersHTML()}
+
+  <div class="kpi-row" style="grid-template-columns:repeat(6,1fr);">
+    ${kpi('عدد الفعاليات', fmt(acts.length), fmt(tourns.length)+' بطولة، '+fmt(camps.length)+' معسكر')}
+    ${kpi('اللاعبون فعلي/متوقع', fmt(actP)+' / '+fmt(expP), diffBadgePct(actP,expP))}
+    ${kpi('الميداليات فعلي/متوقع', fmt(medAct)+' / '+fmt(medExp), diffBadgePct(medAct,medExp)+' — بطولات فقط', 'gold')}
+    ${kpi('إجمالي التكلفة الفعلية', fmtSAR(totalCost), '', 'accent')}
+    ${kpi('متوسط تكلفة اللاعب الفعلي', avgCostActual!=null? fmtSAR(avgCostActual):'—', 'إجمالي التكلفة ÷ اللاعبين الفعليين')}
+    ${kpi('متوسط تكلفة اللاعب التقديري', avgCostExpected!=null? fmtSAR(avgCostExpected):'—', 'إجمالي التكلفة ÷ اللاعبين المتوقعين', 'blue')}
+  </div>
+
+  <div class="section-title">
+    <div class="bar"></div><h2>بطاقات أنواع الفعاليات</h2>
+    <span class="desc">${LOCAL.level3? 'مُفلتر على: '+LOCAL.level3+' — انقر على البطاقة مجدداً لإلغاء الفلترة' : 'انقر على أي بطاقة لتفعيل فلترة الجدول أدناه بحسب نوعها'}</span>
+  </div>
+  <div id="typeCardsWrap">${typeCardsHTML(actsExcluding('level3'))}</div>
+
+  ${modeChartsBlockHTML('evType', 'البطولات والمعسكرات — حسب النوع', EVENTS_VIEW_MODE, {labels:EVENTS_MODE_LABELS})}
+
+  <div class="grid2" style="margin-top:14px;">
+    <div class="panel">
+      <div class="panel-head">
+        تكلفة اللاعب: تقديري مقابل فعلي<small>حسب الفعالية — مبالغ</small>
+        <div class="mini-seg" id="evPlayersToggle">
+          <button data-v="actual" class="${EV_PLAYERS_MODE==='actual'?'active':''}">المبلغ الفعلي</button>
+          <button data-v="avg" class="${EV_PLAYERS_MODE==='avg'?'active':''}">متوسط تكلفة اللاعب</button>
+        </div>
+      </div>
+      <div class="panel-body"><div class="chart-box lg"><canvas id="chEvPlayers"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">الميداليات: متوقع مقابل فعلي<small>البطولات فقط</small></div>
+      <div class="panel-body"><div class="chart-box lg"><canvas id="chEvMedals"></canvas></div></div>
+    </div>
+  </div>
+
+  ${fullActivitiesTableHTML(acts, {title:'تفصيل كامل للبطولات والمعسكرات'})}
+  `;
+}
+function mountEvents(){
+  wireActivityFilters();
+  wireTypeCards($("#typeCardsWrap"));
+
+  const acts = actRows();
+  const tourns = acts.filter(a=>a.isTournament);
+  const actsForType = actsExcluding('level3');
+
+  /* عدد المشاركات هنا = عدد سجلات Activities الفعلية لكل نوع؛ الفعلي/التقديري هنا من البيانات المالية على مستوى النوع (نفس أرقام بطاقات الأنواع) */
+  const present = new Set(actsForType.map(a=>a.level3));
+  const extraTypes = [...present].filter(l=> !TYPE_BUCKETS.includes(l));
+  const typeLabels = TYPE_BUCKETS.concat(extraTypes);
+  const typeGroups = typeLabels.map(l=>{
+    const rows = actsForType.filter(a=>a.level3===l);
+    const {actual, budget} = sumFin(finRows(r=> r.level3===l));
+    return {
+      label:l, count:rows.length, cost:actual, budget,
+      expPlayers: rows.reduce((s,a)=>s+a.expPlayers,0),
+      actPlayers: rows.reduce((s,a)=>s+a.actPlayers,0),
+    };
+  });
+
+  const cType = mountModeCharts('evType', EVENTS_VIEW_MODE, typeGroups, setEventsViewMode,
+    {rotate:18, pairAmount:true, onClickLabel:(l)=> setLocal('level3', l)});
+
+  document.querySelectorAll('#evPlayersToggle button').forEach(b=> b.onclick = ()=> setEvPlayersMode(b.dataset.v));
+  const c1 = $("#chEvPlayers");
+  if(c1){
+    const top = acts.slice().filter(a=>a.costPerExpectedPlayer!=null || a.costPerActualPlayer!=null)
+      .sort((a,b)=> (b.actualCost)-(a.actualCost)).slice(0,14);
+    const labels = top.map(a=>a.name.length>26? a.name.slice(0,26)+'…':a.name);
+    if(EV_PLAYERS_MODE==='avg'){
+      makeBar(c1, 'evPlayers', labels, [
+        {label:'تكلفة اللاعب التقديري', data:top.map(a=>a.costPerExpectedPlayer), backgroundColor:PALETTE.sand, borderRadius:4},
+        {label:'تكلفة اللاعب الفعلي', data:top.map(a=>a.costPerActualPlayer), backgroundColor:PALETTE.emerald, borderRadius:4},
+      ], {horizontal:true, dataLabels:true});
+    }else{
+      makeBar(c1, 'evPlayers', labels, [
+        {label:'المبلغ الفعلي', data:top.map(a=>a.actualCost), backgroundColor:PALETTE.forest, borderRadius:4},
+      ], {horizontal:true, dataLabels:true, override:{plugins:{legend:{display:false}}}});
+    }
+  }
+
+  const c2 = $("#chEvMedals");
+  if(c2){
+    const g=[tourns.reduce((s,a)=>s+(a.expGold||0),0), tourns.reduce((s,a)=>s+(a.actGold||0),0)];
+    const s=[tourns.reduce((s2,a)=>s2+(a.expSilver||0),0), tourns.reduce((s2,a)=>s2+(a.actSilver||0),0)];
+    const b=[tourns.reduce((s2,a)=>s2+(a.expBronze||0),0), tourns.reduce((s2,a)=>s2+(a.actBronze||0),0)];
+    makeBar(c2, 'evMedals', ['ذهبية','فضية','برونزية'], [
+      {label:'متوقع', data:[g[0],s[0],b[0]], backgroundColor:'#d8cba0', borderRadius:5},
+      {label:'فعلي', data:[g[1],s[1],b[1]], backgroundColor:[PALETTE.goldmed,PALETTE.silvermed,PALETTE.bronzemed], borderRadius:5},
+    ]);
+  }
+}
+
+/* ================= GENDER / CATEGORY ANALYSIS PAGE ================= */
+let GENDER_VIEW_MODE = 'amount'; /* count | avg | amount */
+let AGECAT_VIEW_MODE = 'amount'; /* count | avg | amount */
+function setGenderViewMode(v){ GENDER_VIEW_MODE=v; renderPage(); }
+function setAgeCatViewMode(v){ AGECAT_VIEW_MODE=v; renderPage(); }
+
+function pageGender(){
+  const acts = actRows();
+  const genders = ['رجال','نساء'];
+  const byGender = {};
+  genders.forEach(g=>{
+    const rows = acts.filter(a=>a.genderLabel===g);
+    const tourns = rows.filter(a=>a.isTournament);
+    byGender[g] = {
+      activities: rows.length,
+      expP: rows.reduce((s,a)=>s+a.expPlayers,0),
+      actP: rows.reduce((s,a)=>s+a.actPlayers,0),
+      staff: rows.reduce((s,a)=>s+a.staff,0),
+      medExp: tourns.reduce((s,a)=>s+(a.medExp||0),0),
+      medAct: tourns.reduce((s,a)=>s+(a.medAct||0),0),
+      cost: rows.reduce((s,a)=>s+a.actualCost,0),
+    };
+  });
+  const totActP = byGender['رجال'].actP + byGender['نساء'].actP;
+  const totMedAct = byGender['رجال'].medAct + byGender['نساء'].medAct;
+  const totStaff = byGender['رجال'].staff + byGender['نساء'].staff;
+  const totAct = byGender['رجال'].activities + byGender['نساء'].activities;
+  const totCost = byGender['رجال'].cost + byGender['نساء'].cost;
+
+  const rowsSummary = genders.map(g=>{
+    const o = byGender[g];
+    return `<tr>
+      <td>${genderTag(g)}</td>
+      <td>${fmt(o.activities)}</td>
+      <td>${totAct? pctStr(o.activities/totAct*100):'—'}</td>
+      <td>${fmt(o.expP)}</td>
+      <td>${fmt(o.actP)}</td>
+      <td>${totActP? pctStr(o.actP/totActP*100):'—'}</td>
+      <td>${diffBadge(o.actP-o.expP)}</td>
+      <td>${fmt(o.medExp)}</td>
+      <td>${fmt(o.medAct)}</td>
+      <td>${totMedAct? pctStr(o.medAct/totMedAct*100):'—'}</td>
+      <td>${fmt(o.staff)}</td>
+      <td>${totStaff? pctStr(o.staff/totStaff*100):'—'}</td>
+      <td>${fmt(o.cost)}</td>
+      <td>${totCost? pctStr(o.cost/totCost*100):'—'}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+  ${sectionTitle('تحليل الفئات', 'توزيع اللاعبين والميداليات والجهاز الفني والصرف حسب الجنس والفئة العمرية')}
+
+  ${activityFiltersHTML()}
+
+  <div class="section-title">
+    <div class="bar"></div><h2>بطاقات الفئة العمرية</h2>
+    <span class="desc">${LOCAL.partCat? 'مُفلتر على: '+LOCAL.partCat+' — انقر على البطاقة مجدداً لإلغاء الفلترة' : 'انقر على أي بطاقة لتفعيل فلترة الجدول والرسوم أدناه بحسب فئتها'}</span>
+  </div>
+  <div id="ageCardsWrap">${ageCardsHTML(actsExcluding('partCat'))}</div>
+
+  ${modeChartsBlockHTML('ageCatMode', 'توزيع اللاعبين حسب الفئة العمرية / فئة المشاركة', AGECAT_VIEW_MODE, {withMedals:true})}
+
+  ${modeChartsBlockHTML('genderMode', 'التوزيع حسب الجنس', GENDER_VIEW_MODE, {withMedals:true})}
+
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-head">ملخص مقارن حسب الجنس<small>جميع النسب محسوبة من الإجمالي الفعلي</small></div>
+    <div class="table-wrap">
+      <table class="datatable">
+        <thead><tr>
+          <th>الجنس</th><th>عدد الفعاليات</th><th>% الفعاليات</th>
+          <th>لاعبون متوقع</th><th>لاعبون فعلي</th><th>% اللاعبين</th><th>انحراف اللاعبين</th>
+          <th>ميداليات متوقع</th><th>ميداليات فعلي</th><th>% الميداليات</th>
+          <th>الجهاز الفني</th><th>% الجهاز الفني</th>
+          <th>التكلفة الفعلية</th><th>% التكلفة</th>
+        </tr></thead>
+        <tbody>${rowsSummary}</tbody>
+      </table>
+    </div>
+  </div>
+
+  ${fullActivitiesTableHTML(acts, {title:'جدول المشاركات — حسب الجنس والفئات'})}
+  `;
+}
+function mountGender(){
+  wireActivityFilters();
+  const acts = actRows();
+  wireAgeCards($("#ageCardsWrap"));
+
+  const genderGroups = groupStatsBy(acts.filter(a=>a.genderLabel==='رجال'||a.genderLabel==='نساء'), a=>a.genderLabel);
+  mountModeCharts('genderMode', GENDER_VIEW_MODE, genderGroups, setGenderViewMode,
+    {colors:[PALETTE.navy, PALETTE.pink], onClickLabel:(l)=> setLocal('gender', l)});
+
+  const ageGroups = groupStatsBy(acts, a=>a.partCat).sort((a,b)=>b.count-a.count);
+  mountModeCharts('ageCatMode', AGECAT_VIEW_MODE, ageGroups, setAgeCatViewMode,
+    {rotate:20, onClickLabel:(l)=> setLocal('partCat', l)});
+}
+
+/* ================= COUNTRIES & CITIES PAGE ================= */
+let GEO_VIEW_MODE = 'amount'; /* count | avg | amount */
+let CLASS_VIEW_MODE = 'amount'; /* count | avg | amount */
+let GEO_DRILL_COUNTRY = null; /* عند اختيار دولة من رسم "توزيع المشاركات حسب الدولة" — يعرض مدنها بدل قائمة الدول */
+function setGeoViewMode(v){ GEO_VIEW_MODE=v; renderPage(); }
+function setClassViewMode(v){ CLASS_VIEW_MODE=v; renderPage(); }
+function setGeoDrillCountry(c){ GEO_DRILL_COUNTRY = (GEO_DRILL_COUNTRY===c ? null : c); renderPage(); }
+
+function pageGeo(){
+  const acts = actRows();
+  const byCountry = mapToSorted(new Map([...new Set(acts.map(a=>a.country))].map(c=>{
+    const rows = acts.filter(a=>a.country===c);
+    return [c, {count:rows.length, players:rows.reduce((s,a)=>s+a.actPlayers,0)}];
+  })), 'count');
+
+  const cityKeys = [...new Set(acts.map(a=> a.city+'|||'+a.country))];
+  const byCity = cityKeys.map(k=>{
+    const [city,country] = k.split('|||');
+    const rows = acts.filter(a=>a.city===city && a.country===country);
+    const tourns = rows.filter(a=>a.isTournament);
+    const cost = rows.reduce((s,a)=>s+a.actualCost,0);
+    return {
+      city, country,
+      count: rows.length,
+      expP: rows.reduce((s,a)=>s+a.expPlayers,0),
+      actP: rows.reduce((s,a)=>s+a.actPlayers,0),
+      medAct: tourns.reduce((s,a)=>s+(a.medAct||0),0),
+      cost,
+      avgCost: rows.length? cost/rows.length : 0,
+    };
+  }).sort((a,b)=> b.count-a.count);
+
+  const rowsCity = byCity.map(o=>`
+    <tr>
+      <td>${o.city}</td>
+      <td>${o.country}</td>
+      <td>${fmt(o.count)}</td>
+      <td>${fmt(o.expP)}</td>
+      <td>${fmt(o.actP)}</td>
+      <td>${diffBadge(o.actP-o.expP)}</td>
+      <td>${fmt(o.medAct)}</td>
+      <td>${fmt(o.cost)}</td>
+      <td>${fmt(o.avgCost)}</td>
+    </tr>`).join('');
+
+  return `
+  ${sectionTitle('تحليل الدول والمدن', 'توزيع الفعاليات جغرافياً — جدول المدن الكامل بدون حد أقصى')}
+
+  ${activityFiltersHTML()}
+
+  <div class="section-title" style="margin-top:0;">
+    <div class="bar"></div><h2>بطاقات التصنيف (Classification)</h2>
+    <span class="desc">${LOCAL.classification? 'مُفلتر على: '+LOCAL.classification+' — انقر على البطاقة مجدداً لإلغاء الفلترة' : 'انقر على أي بطاقة لتفعيل فلترة الرسوم والجداول أدناه بحسب تصنيفها'}</span>
+  </div>
+  <div id="classCardsWrap">${classCardsHTML(actsExcluding('classification'))}</div>
+
+  ${modeChartsBlockHTML('classMode', 'توزيع المشاركات حسب التصنيف (Classification)', CLASS_VIEW_MODE, {withMedals:true})}
+
+  ${modeChartsBlockHTML('geoMode', GEO_DRILL_COUNTRY? `توزيع المشاركات حسب المدينة — ${GEO_DRILL_COUNTRY}` : 'توزيع المشاركات حسب الدولة', GEO_VIEW_MODE, {withMedals:true,
+    extra: GEO_DRILL_COUNTRY
+      ? `<button id="geoBackBtn" class="reset-btn" type="button">‹ عودة لكل الدول</button>`
+      : `<span class="hint-click">💡 انقر على أي دولة لعرض مدنها</span>`
+  })}
+
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-head">جدول المدن<small>${fmt(byCity.length)} مدينة</small></div>
+    <div class="table-wrap">
+      <table class="datatable">
+        <thead><tr>
+          <th>المدينة</th><th>الدولة</th><th>عدد الفعاليات</th>
+          <th>لاعبون متوقع</th><th>لاعبون فعلي</th><th>انحراف</th>
+          <th>الميداليات الفعلية</th><th>التكلفة الفعلية</th><th>متوسط التكلفة/فعالية</th>
+        </tr></thead>
+        <tbody>${rowsCity || '<tr><td colspan="9" class="empty-state">لا توجد بيانات</td></tr>'}</tbody>
+      </table>
+    </div>
+  </div>
+
+  ${fullActivitiesTableHTML(acts, {title:'جدول المشاركات — حسب الدول والمدن'})}
+  `;
+}
+function mountGeo(){
+  wireActivityFilters();
+  const acts = actRows();
+  wireClassCards($("#classCardsWrap"));
+
+  if(GEO_DRILL_COUNTRY){
+    const cityGroups = groupStatsBy(acts.filter(a=>a.country===GEO_DRILL_COUNTRY), a=>a.city).sort((a,b)=>b.count-a.count).slice(0,15);
+    mountModeCharts('geoMode', GEO_VIEW_MODE, cityGroups, setGeoViewMode,
+      {horizontal:true, onClickLabel:(l)=> toggleGFValue('city', l)});
+  }else{
+    const countryGroups = groupStatsBy(acts, a=>a.country).sort((a,b)=>b.count-a.count).slice(0,10);
+    mountModeCharts('geoMode', GEO_VIEW_MODE, countryGroups, setGeoViewMode,
+      {horizontal:true, onClickLabel:(l)=> setGeoDrillCountry(l)});
+  }
+  const geoBackBtn = $("#geoBackBtn");
+  if(geoBackBtn) geoBackBtn.addEventListener('click', ()=> setGeoDrillCountry(null));
+
+  const classGroups = groupStatsBy(acts, a=>a.classification).sort((a,b)=>b.count-a.count);
+  mountModeCharts('classMode', CLASS_VIEW_MODE, classGroups, setClassViewMode,
+    {onClickLabel:(l)=> setLocal('classification', l)});
+}
+
+/* ================= FEDERATIONS PAGE ================= */
+/* مطابقة اتحاد بدون احتساب فلتر "الاتحاد" نفسه — تُستخدم في رسم مقارنة كل الاتحادات حتى يبقى الرسم يعرض الجميع دوماً */
+function matchesFedExcludingFed(fedId){
+  const f = FEDMETA[fedId];
+  if(!f) return true;
+  if(!inFilter(GF.size, f.size)) return false;
+  if(!inFilter(GF.stream, f.stream)) return false;
+  if(!inFilter(GF.tier, f.tier)) return false;
+  if(!inFilter(GF.category, f.category)) return false;
+  if(!inFilter(GF.username, f.username)) return false;
+  if(!inFilter(GF.password, f.password)) return false;
+  if(!inFilter(GF.reviewer, f.reviewer)) return false;
+  return true;
+}
+/* فعاليات/بيانات مالية اتحاد معيّن — تحترم كل الفلاتر (الربع، الدولة، المدينة، نوع الفعالية، التصنيف، الجنس) عدا فلتر الاتحاد نفسه */
+function fedRowsFor(fedId){
+  return ACT.filter(a=>{
+    if(a.fedId!==fedId) return false;
+    if(!inFilter(GF.quarter, a.quarter)) return false;
+    if(!inFilter(GF.country, a.country)) return false;
+    if(!inFilter(GF.city, a.city)) return false;
+    if(LOCAL.type==='tournament' && !a.isTournament) return false;
+    if(LOCAL.type==='camp' && !a.isCamp) return false;
+    if(LOCAL.classification && a.classification!==LOCAL.classification) return false;
+    if(LOCAL.gender && a.genderLabel!==LOCAL.gender) return false;
+    return true;
+  });
+}
+function fedFinFor(fedId){
+  return FIN.filter(r=> r.fedId===fedId && inFilter(GF.quarter, r.quarter));
+}
+/* إحصائيات موحّدة لكل اتحاد — تُستخدم في رسم المقارنة والجدول معاً */
+function fedChartStatsList(){
+  const chartFeds = FED.filter(f=> matchesFedExcludingFed(f.id));
+  return chartFeds.map(f=>{
+    const rows = fedRowsFor(f.id);
+    const fin = fedFinFor(f.id);
+    const {actual, budget} = sumFin(fin);
+    const tourns = rows.filter(a=>a.isTournament);
+    return {
+      id: f.id, label: f.nameAr,
+      cost: actual, budget,
+      count: rows.length,
+      actPlayers: rows.reduce((s,a)=>s+a.actPlayers,0),
+      expPlayers: rows.reduce((s,a)=>s+a.expPlayers,0),
+      medAct: tourns.reduce((s,a)=>s+(a.medAct||0),0),
+      medExp: tourns.reduce((s,a)=>s+(a.medExp||0),0),
+      avgPerActivity: rows.length? actual/rows.length : 0,
+      byLevel2: groupSumFin(fin, r=>r.level2), /* فني / تشغيلي — فعلي، موازنة، عدد لكل منهما */
+    };
+  });
+}
+let FED_CHART_MODE = 'cost'; /* cost | avg | medals | pct | players | count */
+const FED_CHART_MODE_LABELS = {cost:'مصاريف', avg:'متوسط المشاركة الواحدة', medals:'ميداليات', pct:'نسبة الصرف', players:'لاعبين', count:'عدد مشاركات'};
+function setFedChartMode(v){ FED_CHART_MODE=v; renderPage(); }
+/* يرسم لوحة مقارنة الاتحادات حسب الوضع الحالي — الأوضاع التي لها متوقع/فعلي (مصاريف، ميداليات، لاعبين) تُعرض بعمودين مقترنين */
+function renderFedChart(canvas, stats, mode, onClickLabel){
+  if(!canvas || !stats.length) return;
+  const onClk = l=>{ const f = FED.find(x=>x.nameAr===l); if(f) onClickLabel(f.id); };
+  if(mode==='cost'){
+    const sorted = stats.slice().sort((a,b)=> b.cost-a.cost);
+    makeBar(canvas,'fedAll', sorted.map(o=>o.label), [
+      {label:'الموازنة (تقديري)', data: sorted.map(o=>o.budget||0), backgroundColor:PALETTE.gold, borderRadius:5},
+      {label:'الفعلي', data: sorted.map(o=>o.cost), backgroundColor:PALETTE.forest, borderRadius:5},
+    ], {horizontal:true, onClickLabel:onClk});
+  }else if(mode==='medals'){
+    const sorted = stats.slice().sort((a,b)=> b.medAct-a.medAct);
+    makeBar(canvas,'fedAll', sorted.map(o=>o.label), [
+      {label:'متوقع', data: sorted.map(o=>o.medExp), backgroundColor:'#d8cba0', borderRadius:5},
+      {label:'فعلي', data: sorted.map(o=>o.medAct), backgroundColor:PALETTE.goldmed, borderRadius:5},
+    ], {horizontal:true, onClickLabel:onClk});
+  }else if(mode==='players'){
+    const sorted = stats.slice().sort((a,b)=> b.actPlayers-a.actPlayers);
+    makeBar(canvas,'fedAll', sorted.map(o=>o.label), [
+      {label:'متوقع', data: sorted.map(o=>o.expPlayers), backgroundColor:PALETTE.sand, borderRadius:5},
+      {label:'فعلي', data: sorted.map(o=>o.actPlayers), backgroundColor:PALETTE.navy, borderRadius:5},
+    ], {horizontal:true, onClickLabel:onClk});
+  }else if(mode==='pct'){
+    /* نسبة الصرف: عمود واحد لكل اتحاد يمثل إجمالي الفعلي، مقسّم (Stacked) حسب نسبة فني/تشغيلي من هذا الفعلي */
+    const l2Keys = [...new Set(stats.flatMap(o=> [...o.byLevel2.keys()]))];
+    const l2Colors = [PALETTE.forest, PALETTE.gold, PALETTE.navy, PALETTE.pink, PALETTE.emerald];
+    const totals = stats.map(o=> l2Keys.reduce((s,k)=> s + ((o.byLevel2.get(k)||{}).actual||0), 0));
+    const sorted = stats.map((o,i)=>({o,total:totals[i]})).sort((a,b)=> b.total-a.total).map(x=>x.o);
+    const datasets = l2Keys.map((k,i)=>{
+      const amounts = sorted.map(o=> o.byLevel2.get(k) || {actual:0, budget:0, count:0});
+      const fedTotals = sorted.map(o=> l2Keys.reduce((s,kk)=> s + ((o.byLevel2.get(kk)||{}).actual||0), 0));
+      return {
+        label:k,
+        data: amounts.map(e=> e.actual||0),
+        backgroundColor: l2Colors[i%l2Colors.length], borderRadius:3,
+        _amounts: amounts, _totals: fedTotals,
+      };
+    });
+    makeBar(canvas,'fedAll', sorted.map(o=>o.label), datasets, {
+      horizontal:true, dataLabels:true, stacked:true, centerLabels:true,
+      labelFmt:(v,dsIndex,i)=>{
+        const ds = datasets[dsIndex]; const total = ds._totals[i];
+        if(!v || !total) return '';
+        return fmt1(v/total*100)+'٪';
+      },
+      override:{ plugins:{ tooltip:{ callbacks:{ label:(ctx)=>{
+        const ds = ctx.chart.data.datasets[ctx.datasetIndex];
+        const amt = ds._amounts[ctx.dataIndex];
+        const total = ds._totals[ctx.dataIndex];
+        const pct = total? (amt.actual/total*100) : null;
+        return `${ds.label}: الفعلي ${fmt(amt.actual)} ر.س${pct!=null? ' — '+fmt1(pct)+'٪ من إجمالي فعلي الاتحاد' : ''}`;
+      } } } } },
+      onClickLabel:onClk});
+  }else if(mode==='avg'){
+    const sorted = stats.slice().sort((a,b)=> b.avgPerActivity-a.avgPerActivity);
+    makeBar(canvas,'fedAll', sorted.map(o=>o.label), [
+      {label:'متوسط المشاركة الواحدة', data: sorted.map(o=>o.avgPerActivity), backgroundColor:PAL_LIST, borderRadius:5},
+    ], {horizontal:true, dataLabels:true, override:{plugins:{legend:{display:false}}}, onClickLabel:onClk});
+  }else{
+    const sorted = stats.slice().sort((a,b)=> b.count-a.count);
+    makeBar(canvas,'fedAll', sorted.map(o=>o.label), [
+      {label:'عدد المشاركات', data: sorted.map(o=>o.count), backgroundColor:PAL_LIST, borderRadius:5},
+    ], {horizontal:true, dataLabels:true, override:{plugins:{legend:{display:false}}}, onClickLabel:onClk});
+  }
+}
+/* جدول انحراف الميداليات/اللاعبين (متوقع مقابل فعلي) لكل اتحاد — شارات ملوّنة بنفس أسلوب باقي المنصة */
+function fedDeviationTableHTML(stats, mode){
+  const expField = mode==='medals' ? 'medExp' : 'expPlayers';
+  const actField = mode==='medals' ? 'medAct' : 'actPlayers';
+  const title = mode==='medals' ? 'الميداليات' : 'اللاعبين';
+  const sorted = stats.slice().sort((a,b)=> b[actField]-a[actField]);
+  const rows = sorted.map(o=>{
+    const exp = o[expField], act = o[actField];
+    return `<tr>
+      <td>${o.label}</td>
+      <td>${fmt(exp)}</td>
+      <td>${fmt(act)}</td>
+      <td>${diffBadge(act-exp)}</td>
+      <td>${diffBadgePct(act, exp)}</td>
+    </tr>`;
+  }).join('');
+  return `
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-head">نسبة تحقيق ${title} لكل اتحاد<small>الفعلي مقابل المتوقع</small></div>
+    <div class="table-wrap">
+      <table class="datatable">
+        <thead><tr><th>الاتحاد</th><th>متوقع</th><th>فعلي</th><th>الانحراف</th><th>نسبة التحقيق</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="5" class="empty-state">لا توجد بيانات</td></tr>'}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+let FED_TABLE_SORT = 'count'; /* count | players | medals | cost */
+const FED_SORT_LABELS = {count:'المشاركات الأعلى', players:'اللاعبين', medals:'الميداليات', cost:'المصروفات'};
+function setFedTableSort(v){ FED_TABLE_SORT=v; renderPage(); }
+
+function pageFederations(){
+  const feds = FED.filter(f=> matchesFed(f.id)).sort((a,b)=>a.nameAr.localeCompare(b.nameAr,'ar'));
+  const chartStats = fedChartStatsList();
+  const grandTotalCost = chartStats.reduce((s,o)=>s+o.cost,0);
+
+  const rowsStats = feds.map(f=>{
+    const rows = fedRowsFor(f.id);
+    const fin = fedFinFor(f.id);
+    const {actual, budget, diff} = sumFin(fin);
+    const tourns = rows.filter(a=>a.isTournament);
+    const camps = rows.filter(a=>a.isCamp);
+    const actP = rows.reduce((s,a)=>s+a.actPlayers,0);
+    const medAct = tourns.reduce((s,a)=>s+(a.medAct||0),0);
+    const cost = rows.reduce((s,a)=>s+a.actualCost,0);
+    const avgCost = actP? cost/actP : null;
+    const pctOfTotal = grandTotalCost? (actual/grandTotalCost*100) : null;
+    return {f, actual, budget, diff, tourns, camps, actP, medAct, avgCost, pctOfTotal, count:rows.length};
+  });
+
+  const sortField = {count:'count', players:'actP', medals:'medAct', cost:'actual'}[FED_TABLE_SORT] || 'count';
+  const rowsSorted = rowsStats.slice().sort((a,b)=> b[sortField]-a[sortField]);
+
+  const rows = rowsSorted.map(o=>{
+    const f = o.f;
+    return `<tr>
+      <td>${f.nameAr}</td>
+      <td>${f.nameEn||'—'}</td>
+      <td>${f.stream}</td>
+      <td>${f.tier}</td>
+      <td>${f.category}</td>
+      <td>${f.size}</td>
+      <td>${fmt(o.actual)}</td>
+      <td>${fmt(o.budget)}</td>
+      <td>${diffBadge(o.diff)}</td>
+      <td>${o.pctOfTotal!=null? pctStr(o.pctOfTotal) : '—'}</td>
+      <td>${fmt(o.count)}</td>
+      <td>${fmt(o.tourns.length)}</td>
+      <td>${fmt(o.camps.length)}</td>
+      <td>${fmt(o.actP)}</td>
+      <td>${fmt(o.medAct)}</td>
+      <td>${o.avgCost!=null? fmt(o.avgCost) : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  /* إحصائيات أعلى الصفحة — تتحدث تلقائياً عند اختيار اتحاد معيّن من الفلتر أو من الرسم أدناه */
+  const kpiActual = rowsStats.reduce((s,o)=>s+o.actual,0);
+  const kpiActP = rowsStats.reduce((s,o)=>s+o.actP,0);
+  const kpiMedAct = rowsStats.reduce((s,o)=>s+o.medAct,0);
+  const singleFedPct = (GF.fed.length===1 && grandTotalCost) ? (kpiActual/grandTotalCost*100) : null;
+
+  return `
+  ${sectionTitle('الاتحادات', 'بطاقة أداء شاملة لكل اتحاد — مالية وتشغيلية')}
+
+  ${activityFiltersHTML()}
+
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+    ${kpi('عدد الاتحادات المعروضة', fmt(feds.length))}
+    ${kpi('إجمالي المصروفات الفعلية', fmtSAR(kpiActual), '', 'accent')}
+    ${kpi('إجمالي اللاعبين الفعليين', fmt(kpiActP))}
+    ${kpi('إجمالي الميداليات الفعلية', fmt(kpiMedAct), '', 'gold')}
+    ${kpi('% من إجمالي مصروفات كل الاتحادات', singleFedPct!=null? pctStr(singleFedPct) : '—', GF.fed.length===1? (FEDMETA[GF.fed[0]]?.nameAr||''):'اختر اتحاداً واحداً لعرض نسبته', 'blue')}
+  </div>
+
+  <div class="section-title" style="margin-top:14px;">
+    <div class="bar"></div><h2>مقارنة كل الاتحادات</h2>
+    ${viewToggleHTML('fedChartToggle', FED_CHART_MODE, FED_CHART_MODE_LABELS, true)}
+  </div>
+  <div class="panel">
+    <div class="panel-body"><div class="chart-box" style="height:${Math.max(400, chartStats.length*26)}px;"><canvas id="chFedAll"></canvas></div></div>
+  </div>
+
+  ${(FED_CHART_MODE==='medals' || FED_CHART_MODE==='players') ? fedDeviationTableHTML(chartStats, FED_CHART_MODE) : ''}
+
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-head">
+      جدول الاتحادات<small>${fmt(feds.length)} اتحاد</small>
+      <div class="f-group" style="margin:0;">
+        <select id="fedSort" class="control" style="min-width:170px;">
+          ${Object.entries(FED_SORT_LABELS).map(([k,l])=>`<option value="${k}" ${FED_TABLE_SORT===k?'selected':''}>فرز: ${l}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="datatable">
+        <thead><tr>
+          <th>الاسم (عربي)</th><th>الاسم (EN)</th><th>Stream</th><th>Tier</th><th>الفئة</th><th>الحجم</th>
+          <th>الفعلي</th><th>الموازنة</th><th>الانحراف</th><th>% من إجمالي المصروفات</th>
+          <th>عدد المشاركات</th><th>بطولات</th><th>معسكرات</th><th>لاعبون فعلي</th><th>ميداليات فعلية</th><th>متوسط تكلفة اللاعب</th>
+        </tr></thead>
+        <tbody>${rows || '<tr><td colspan="16" class="empty-state">لا توجد بيانات</td></tr>'}</tbody>
+      </table>
+    </div>
+  </div>
+  `;
+}
+function mountFederations(){
+  wireActivityFilters();
+  document.querySelectorAll('#fedChartToggle button').forEach(b=> b.onclick = ()=> setFedChartMode(b.dataset.v));
+  const sortSel = $("#fedSort");
+  if(sortSel) sortSel.addEventListener('change', e=> setFedTableSort(e.target.value));
+
+  const chartStats = fedChartStatsList();
+  const c1 = $("#chFedAll");
+  renderFedChart(c1, chartStats, FED_CHART_MODE, fedId=> toggleGFValue('fed', fedId));
+}
+
+/* ================= LOGIN + DATA FETCH (متصل بالسيرفر/قاعدة البيانات عبر API) =================
+   API_BASE: اتركه فارغاً '' إذا كانت هذه الصفحة تُقدَّم من نفس سيرفر Node (الحالة الافتراضية في هذا المشروع).
+   إذا استضفت الواجهة بشكل منفصل (مثلاً GitHub Pages) وربطتها بسيرفر API على نطاق آخر، ضع رابط السيرفر هنا،
+   مثال: const API_BASE = 'https://your-api.onrender.com'; */
+const API_BASE = '';
+const loaderOverlay = document.getElementById('loaderOverlay');
+const switchUserBtn = document.getElementById('switchUserBtn');
+
+switchUserBtn.addEventListener('click', ()=>{
+  localStorage.removeItem('authToken');
+  document.getElementById('appShell').style.display='none';
+  openLoginScreen();
+});
+
+/* ================= LOGIN SCREEN (اتحاد / مراجع) ================= */
+const loginScreen = document.getElementById('loginScreen');
+const loginTypeSeg = document.getElementById('loginTypeSeg');
+const loginFormFed = document.getElementById('loginFormFed');
+const loginFormReviewer = document.getElementById('loginFormReviewer');
+const loginErrorBox = document.getElementById('loginErrorBox');
+const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+const loginFedUser = document.getElementById('loginFedUser');
+const loginFedPass = document.getElementById('loginFedPass');
+const loginRevUser = document.getElementById('loginRevUser');
+const loginRevPass = document.getElementById('loginRevPass');
+
+function openLoginScreen(){
+  loginScreen.style.display='flex';
+  loginErrorBox.style.display='none';
+  loginFedUser.value=''; loginFedPass.value=''; loginRevUser.value=''; loginRevPass.value='';
+  loginTypeSeg.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b.dataset.v==='fed'));
+  loginFormFed.style.display='block'; loginFormReviewer.style.display='none';
+}
+loginTypeSeg.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    loginTypeSeg.querySelectorAll('button').forEach(x=> x.classList.remove('active'));
+    b.classList.add('active');
+    loginFormFed.style.display = b.dataset.v==='fed' ? 'block':'none';
+    loginFormReviewer.style.display = b.dataset.v==='reviewer' ? 'block':'none';
+    loginErrorBox.style.display='none';
+  });
+});
+
+async function attemptLogin(){
+  loginErrorBox.style.display='none';
+  const activeType = loginTypeSeg.querySelector('button.active').dataset.v;
+  let u, p, endpoint;
+  if(activeType==='fed'){
+    u = loginFedUser.value.trim(); p = loginFedPass.value; endpoint = '/api/login/federation';
+  }else{
+    u = loginRevUser.value.trim(); p = loginRevPass.value; endpoint = '/api/login/reviewer';
+  }
+  if(!u || !p){ loginErrorBox.textContent='الرجاء تعبئة كل الحقول.'; loginErrorBox.style.display='block'; return; }
+
+  loginSubmitBtn.disabled = true; loginSubmitBtn.textContent = '... جارِ التحقق';
+  try{
+    const res = await fetch(API_BASE+endpoint, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:u, password:p})
+    });
+    const json = await res.json();
+    if(!res.ok) throw new Error(json.error || 'بيانات الدخول غير صحيحة');
+
+    localStorage.setItem('authToken', json.token);
+    await loadDataAndStart(json.token, json.auth);
+  }catch(err){
+    loginErrorBox.textContent = err.message || 'تعذّر تسجيل الدخول. تأكد من اتصال السيرفر.';
+    loginErrorBox.style.display='block';
+  }finally{
+    loginSubmitBtn.disabled = false; loginSubmitBtn.textContent = 'دخول';
+  }
+}
+loginSubmitBtn.addEventListener('click', attemptLogin);
+[loginFedUser, loginFedPass, loginRevUser, loginRevPass].forEach(inp=>{
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') attemptLogin(); });
+});
+
+/* يجلب بيانات الاتحادات/المالية/الفعاليات من السيرفر (مفلترة مسبقاً حسب صلاحية المستخدم) ثم يبدأ التطبيق */
+async function loadDataAndStart(token, auth){
+  loaderOverlay.style.display='flex';
+  try{
+    const res = await fetch(API_BASE+'/api/data', { headers:{ 'Authorization':'Bearer '+token } });
+    if(res.status===401){ localStorage.removeItem('authToken'); openLoginScreen(); throw new Error('انتهت صلاحية الجلسة، الرجاء تسجيل الدخول مجدداً.'); }
+    const db = await res.json();
+    if(!res.ok) throw new Error(db.error || 'تعذّر جلب البيانات من السيرفر.');
+    startApp(db, auth);
+  }catch(err){
+    loginErrorBox.textContent = err.message;
+    loginErrorBox.style.display='block';
+  }finally{
+    loaderOverlay.style.display='none';
+  }
+}
+
+function renderAuthBadge(){
+  const el = document.getElementById('authBadge');
+  if(!el) return;
+  if(AUTH.role==='fed'){
+    const f = FEDMETA[AUTH.fedId];
+    el.textContent = '🏛️ ' + (f? f.nameAr : ('اتحاد #'+AUTH.fedId));
+    el.style.display='inline-block';
+  }else if(AUTH.role==='reviewer'){
+    el.textContent = '👤 مراجع: ' + AUTH.reviewerName;
+    el.style.display='inline-block';
+  }else{
+    el.textContent = '🛡️ مدير — جميع الاتحادات';
+    el.style.display='inline-block';
+  }
+}
+
+/* ================= START APP ================= */
+function startApp(db, auth){
+  FED = db.fed; FIN = db.fin; ACT = db.act;
+  AUTH = auth || {role:'admin'};
+  prepare();
+  Object.assign(GF, emptyGF()); clearLocal();
+  if(AUTH.role==='fed') GF.fed = [AUTH.fedId];
+  if(AUTH.role==='reviewer') GF.reviewer = [AUTH.reviewerName];
+  activePage = 'overview';
+
+  loginScreen.style.display='none';
+  document.getElementById('appShell').style.display='block';
+
+  renderAuthBadge();
+  renderFiltersBar();
+  initTabs();
+  renderChips();
+  renderPage();
+  $("#resetBtn").addEventListener('click', clearAll);
+  window.scrollTo({top:0});
+}
+
+/* ================= AUTO-LOGIN عند إعادة تحميل الصفحة (Token محفوظ) ================= */
+(function boot(){
+  const saved = localStorage.getItem('authToken');
+  if(saved){
+    fetch(API_BASE+'/api/me', { headers:{ 'Authorization':'Bearer '+saved } })
+      .then(r=> r.ok ? r.json() : Promise.reject())
+      .then(json=> loadDataAndStart(saved, json.auth))
+      .catch(()=>{ localStorage.removeItem('authToken'); openLoginScreen(); });
+  }else{
+    openLoginScreen();
+  }
+})();
+
+</script>
+</body>
+</html>
