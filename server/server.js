@@ -15,6 +15,30 @@ app.use(express.json());
 // يقدّم ملفات الواجهة (public/index.html) من نفس السيرفر
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+/* ---------------- مسار تشخيصي مؤقت — احذفه بعد ما تتأكد إن كل شي شغّال ----------------
+   افتحه بالمتصفح: https://your-app.onrender.com/api/_diag */
+app.get('/api/_diag', (req, res) => {
+  const fs = require('fs');
+  const publicDir = path.join(__dirname, '..', 'public');
+  let publicFiles = [];
+  let publicDirError = null;
+  try{ publicFiles = fs.readdirSync(publicDir); }
+  catch(e){ publicDirError = e.message; }
+
+  res.json({
+    __dirname,
+    publicDir,
+    publicDirExists: fs.existsSync(publicDir),
+    publicFiles,
+    publicDirError,
+    indexHtmlExists: fs.existsSync(path.join(publicDir, 'index.html')),
+    hasDATABASE_URL: !!process.env.DATABASE_URL,
+    hasJWT_SECRET: !!process.env.JWT_SECRET,
+    nodeVersion: process.version,
+    cwd: process.cwd(),
+  });
+});
+
 /* ---------------- تحويل صفوف قاعدة البيانات لشكل تتوقعه الواجهة ---------------- */
 function mapFed(r){
   return {
@@ -143,8 +167,9 @@ app.get('/api/data', authenticate, async (req, res) => {
   }
 });
 
-/* أي مسار غير معروف يعيد الواجهة (Single Page App) */
-app.get('*', (req, res) => {
+/* أي مسار غير معروف (وليس API) يعيد الواجهة (Single Page App) */
+app.use((req, res) => {
+  if(req.path.startsWith('/api/')) return res.status(404).json({error:'مسار غير موجود'});
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
