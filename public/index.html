@@ -257,6 +257,7 @@ footer .logoline{font-weight:800; color:var(--forest); font-family:'Cairo',sans-
     <div style="display:flex; align-items:center; gap:10px;">
       <div class="fy-badge" id="authBadge" style="display:none;"></div>
       <div class="fy-badge">السنة المالية 2026م</div>
+      <button class="reupload-btn" id="printReportBtn">🖨️ طباعة تقرير شامل</button>
       <button class="reupload-btn" id="switchUserBtn">🚪 تسجيل خروج</button>
     </div>
   </div>
@@ -2100,6 +2101,125 @@ switchUserBtn.addEventListener('click', ()=>{
   document.getElementById('appShell').style.display='none';
   openLoginScreen();
 });
+
+/* ================= طباعة تقرير شامل (كل الأقسام/التبويبات معاً، وليس القسم الحالي فقط) =================
+   الفكرة: نمرّ برمجياً على كل تبويب من PAGES (بنفس دالة renderPage/mount المستخدمة أصلاً)،
+   ننتظر رسم الرسوم البيانية (Chart.js) ثم نحوّل كل canvas إلى صورة (toDataURL) قبل الانتقال للتبويب التالي
+   (لأن كل التبويبات تتشارك نفس عنصر #page وتُعاد كتابته في كل مرة)، ثم نجمع الكل في نافذة طباعة مستقلة. */
+const printReportBtn = document.getElementById('printReportBtn');
+function waitFrames(n){
+  return new Promise(resolve=>{
+    let left = n;
+    function step(){ left--; if(left<=0) resolve(); else requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  });
+}
+function activeFiltersSummaryText(){
+  const chipsWrap = document.getElementById('chips');
+  const chips = chipsWrap ? [...chipsWrap.querySelectorAll('.chip')].map(c=> c.textContent.replace('✕','').trim()) : [];
+  return chips.length ? chips.join(' — ') : 'بدون فلاتر (عرض كل البيانات)';
+}
+async function printFullReport(){
+  const originalPage = activePage;
+  const originalLocal = JSON.parse(JSON.stringify(LOCAL));
+  const pagesToPrint = PAGES.filter(p=> !(AUTH.role==='fed' && p.id==='federations'));
+  const filtersText = activeFiltersSummaryText();
+
+  printReportBtn.disabled = true;
+  printReportBtn.textContent = '⏳ جاري تجهيز التقرير...';
+  loaderOverlay.style.display = 'flex';
+  document.getElementById('loaderText').textContent = 'جاري تجهيز التقرير الشامل — الرجاء الانتظار...';
+
+  const prevAnimation = Chart.defaults.animation;
+  Chart.defaults.animation = false; /* لضمان اكتمال رسم كل الرسوم قبل تحويلها لصورة */
+
+  let sectionsHtml = '';
+  try{
+    for(const p of pagesToPrint){
+      document.getElementById('loaderText').textContent = `جاري تجهيز قسم: ${p.label}...`;
+      activePage = p.id;
+      clearLocal();
+      renderPage();
+      await waitFrames(3);
+      await new Promise(r=> setTimeout(r, 220)); /* مهلة إضافية لضمان اكتمال رسم كل الرسوم البيانية */
+
+      const pageEl = document.getElementById('page');
+      const clone = pageEl.cloneNode(true);
+      const liveCanvases = pageEl.querySelectorAll('canvas');
+      const cloneCanvases = clone.querySelectorAll('canvas');
+      liveCanvases.forEach((cv, i)=>{
+        let dataUrl = '';
+        try{ dataUrl = cv.toDataURL('image/png', 1.0); }catch(e){ dataUrl=''; }
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.cssText = 'max-width:100%; width:100%; height:auto; display:block;';
+        if(cloneCanvases[i]) cloneCanvases[i].replaceWith(img);
+      });
+      sectionsHtml += `<section class="print-section">
+        <h2 class="print-section-title">${p.label}</h2>
+        ${clone.innerHTML}
+      </section>`;
+    }
+  }finally{
+    Chart.defaults.animation = prevAnimation;
+    activePage = originalPage;
+    LOCAL = originalLocal;
+    renderPage();
+    loaderOverlay.style.display = 'none';
+    printReportBtn.disabled = false;
+    printReportBtn.textContent = '🖨️ طباعة تقرير شامل';
+  }
+
+  const appStyles = document.querySelector('style') ? document.querySelector('style').innerHTML : '';
+  const roleLabel = AUTH.role==='admin' ? 'مدير (كل الاتحادات)' : AUTH.role==='reviewer' ? ('مراجع — '+(AUTH.reviewerName||'')) : ('اتحاد — '+(FEDMETA[AUTH.fedId]?.nameAr || AUTH.fedId));
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-SA') + ' ' + now.toLocaleTimeString('ar-SA');
+
+  const win = window.open('', '_blank');
+  if(!win){ alert('الرجاء السماح بالنوافذ المنبثقة (Popups) لهذا الموقع حتى تتمكن من طباعة التقرير.'); return; }
+  win.document.open();
+  win.document.write(`<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تقرير شامل — منصة التحليل المالي والتشغيلي للاتحادات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+${appStyles}
+body{background:#fff; padding:0 26px 40px;}
+.filters-wrap, nav.tabs, header.top .reupload-btn, .hint-click, .reset-btn, .ms-panel{display:none !important;}
+.print-report-head{padding:24px 0 14px; border-bottom:3px solid var(--forest); margin-bottom:10px;}
+.print-report-head h1{margin:0 0 6px; font-size:20px; color:var(--forest);}
+.print-report-head .meta{font-size:12px; color:var(--muted); line-height:1.9;}
+.print-section{margin-top:18px; break-inside:avoid-page;}
+.print-section-title{background:linear-gradient(90deg,var(--forest),var(--forest-2)); color:#fff; font-size:15px;
+  padding:10px 16px; border-radius:10px; margin:0 0 14px;}
+.print-section .panel, .print-section .kpi, .print-section .cat-card{break-inside:avoid;}
+main#page{max-width:none; margin:0; padding:0;}
+@media print{
+  body{padding:0 10px;}
+  .print-section{page-break-before:always;}
+  .print-section:first-child{page-break-before:auto;}
+  .panel, .kpi, .cat-card, .table-wrap{break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+  <div class="print-report-head">
+    <h1>تقرير شامل — منصة التحليل المالي والتشغيلي للاتحادات</h1>
+    <div class="meta">
+      نوع المستخدم: ${roleLabel}<br>
+      تاريخ ووقت الطباعة: ${dateStr}<br>
+      الفلاتر المُطبّقة: ${filtersText}
+    </div>
+  </div>
+  <main id="page">${sectionsHtml}</main>
+</body>
+</html>`);
+  win.document.close();
+  win.onload = ()=>{ setTimeout(()=> win.print(), 350); };
+}
+printReportBtn.addEventListener('click', printFullReport);
 
 /* ================= LOGIN SCREEN (اتحاد / مراجع) ================= */
 const loginScreen = document.getElementById('loginScreen');
