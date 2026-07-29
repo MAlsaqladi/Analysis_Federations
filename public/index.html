@@ -206,32 +206,16 @@ footer .logoline{font-weight:800; color:var(--forest); font-family:'Cairo',sans-
   <div class="upload-card" style="max-width:440px;">
     <img class="emblem2" src="logo.png" alt="شعار المنصة" onerror="this.style.display='none';">
     <h1>منصة التحليل المالي والتشغيلي للاتحادات</h1>
-    <p class="lead">اختر نوع الدخول ثم أدخل بيانات الدخول للمتابعة إلى التحليل — البيانات تُقرأ مباشرة من قاعدة البيانات</p>
+    <p class="lead">أدخل بيانات الدخول للمتابعة إلى التحليل — البيانات تُقرأ مباشرة من قاعدة البيانات</p>
 
-    <div class="seg" id="loginTypeSeg" style="width:100%; margin-bottom:18px;">
-      <button type="button" data-v="fed" class="active" style="flex:1;">دخول كاتحاد</button>
-      <button type="button" data-v="reviewer" style="flex:1;">دخول كمراجع</button>
-    </div>
-
-    <div id="loginFormFed">
+    <div id="loginFormUnified">
       <div class="f-group" style="margin-bottom:12px; align-items:stretch;">
-        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">Username</label>
-        <input type="text" id="loginFedUser" class="control" style="width:100%; padding:10px 12px;" autocomplete="off">
+        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">اسم الدخول / Username</label>
+        <input type="text" id="loginUser" class="control" style="width:100%; padding:10px 12px;" autocomplete="off">
       </div>
       <div class="f-group" style="margin-bottom:6px; align-items:stretch;">
-        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">Password</label>
-        <input type="password" id="loginFedPass" class="control" style="width:100%; padding:10px 12px;">
-      </div>
-    </div>
-
-    <div id="loginFormReviewer" style="display:none;">
-      <div class="f-group" style="margin-bottom:12px; align-items:stretch;">
-        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">اسم الدخول</label>
-        <input type="text" id="loginRevUser" class="control" style="width:100%; padding:10px 12px;" autocomplete="off">
-      </div>
-      <div class="f-group" style="margin-bottom:6px; align-items:stretch;">
-        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">كلمة المرور</label>
-        <input type="password" id="loginRevPass" class="control" style="width:100%; padding:10px 12px;">
+        <label style="font-size:11.5px; font-weight:700; color:var(--forest); text-align:right;">كلمة المرور / Password</label>
+        <input type="password" id="loginPass" class="control" style="width:100%; padding:10px 12px;">
       </div>
     </div>
 
@@ -248,7 +232,7 @@ footer .logoline{font-weight:800; color:var(--forest); font-family:'Cairo',sans-
       <img class="emblem" src="logo.png" alt="شعار المنصة" onerror="this.style.display='none';">
       <div>
         <h1>منصة التحليل المالي والتشغيلي للاتحادات</h1>
-        <p>اللجنة الأولمبية والبارالمبية السعودية</p>
+        <p>اللجنة الأولمبية والبارالمبية السعودية — بيانات حية من ملف الإكسل</p>
       </div>
     </div>
     <div style="display:flex; align-items:center; gap:10px;">
@@ -2260,47 +2244,22 @@ main#page{max-width:none; margin:0; padding:14px 26px 40px;}
 }
 printReportBtn.addEventListener('click', printFullReport);
 
-/* ================= LOGIN SCREEN (اتحاد / مراجع) ================= */
+/* ================= LOGIN SCREEN (نموذج موحّد: يجرّب أولاً كمراجع/مدير، وإن لم يوجد يجرّب كاتحاد) ================= */
 const loginScreen = document.getElementById('loginScreen');
-const loginTypeSeg = document.getElementById('loginTypeSeg');
-const loginFormFed = document.getElementById('loginFormFed');
-const loginFormReviewer = document.getElementById('loginFormReviewer');
 const loginErrorBox = document.getElementById('loginErrorBox');
 const loginSubmitBtn = document.getElementById('loginSubmitBtn');
-const loginFedUser = document.getElementById('loginFedUser');
-const loginFedPass = document.getElementById('loginFedPass');
-const loginRevUser = document.getElementById('loginRevUser');
-const loginRevPass = document.getElementById('loginRevPass');
+const loginUser = document.getElementById('loginUser');
+const loginPass = document.getElementById('loginPass');
 
 function openLoginScreen(){
   loginScreen.style.display='flex';
   loginErrorBox.style.display='none';
-  loginFedUser.value=''; loginFedPass.value=''; loginRevUser.value=''; loginRevPass.value='';
-  loginTypeSeg.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b.dataset.v==='fed'));
-  loginFormFed.style.display='block'; loginFormReviewer.style.display='none';
+  loginUser.value=''; loginPass.value='';
 }
-loginTypeSeg.querySelectorAll('button').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    loginTypeSeg.querySelectorAll('button').forEach(x=> x.classList.remove('active'));
-    b.classList.add('active');
-    loginFormFed.style.display = b.dataset.v==='fed' ? 'block':'none';
-    loginFormReviewer.style.display = b.dataset.v==='reviewer' ? 'block':'none';
-    loginErrorBox.style.display='none';
-  });
-});
 
-async function attemptLogin(){
-  loginErrorBox.style.display='none';
-  const activeType = loginTypeSeg.querySelector('button.active').dataset.v;
-  let u, p, endpoint;
-  if(activeType==='fed'){
-    u = loginFedUser.value.trim(); p = loginFedPass.value; endpoint = '/api/login/federation';
-  }else{
-    u = loginRevUser.value.trim(); p = loginRevPass.value; endpoint = '/api/login/reviewer';
-  }
-  if(!u || !p){ loginErrorBox.textContent='الرجاء تعبئة كل الحقول.'; loginErrorBox.style.display='block'; return; }
-
-  loginSubmitBtn.disabled = true; loginSubmitBtn.textContent = '... جارِ التحقق';
+/* يحاول تسجيل الدخول عبر مسار مُعيّن (مراجع/مدير أو اتحاد) دون رمي استثناء — يُعيد نتيجة نجاح/فشل فقط،
+   حتى نقدر نجرّب المسار التالي تلقائياً دون إظهار خطأ للمستخدم في المحاولة الأولى الفاشلة */
+async function tryLoginEndpoint(endpoint, u, p){
   try{
     const res = await fetch(API_BASE+endpoint, {
       method:'POST',
@@ -2308,10 +2267,31 @@ async function attemptLogin(){
       body: JSON.stringify({username:u, password:p})
     });
     const json = await res.json();
-    if(!res.ok) throw new Error(json.error || 'بيانات الدخول غير صحيحة');
+    if(!res.ok) return {ok:false, error: json.error};
+    return {ok:true, json};
+  }catch(e){
+    return {ok:false, error:'تعذّر الاتصال بالسيرفر'};
+  }
+}
 
-    localStorage.setItem('authToken', json.token);
-    await loadDataAndStart(json.token, json.auth);
+async function attemptLogin(){
+  loginErrorBox.style.display='none';
+  const u = loginUser.value.trim(), p = loginPass.value;
+  if(!u || !p){ loginErrorBox.textContent='الرجاء تعبئة كل الحقول.'; loginErrorBox.style.display='block'; return; }
+
+  loginSubmitBtn.disabled = true; loginSubmitBtn.textContent = '... جارِ التحقق';
+  try{
+    /* أولاً: تحقق هل المستخدم مراجع أو مدير */
+    let result = await tryLoginEndpoint('/api/login/reviewer', u, p);
+    /* إن لم يكن موجوداً كمراجع/مدير، تحقق هل هو اتحاد */
+    if(!result.ok){
+      result = await tryLoginEndpoint('/api/login/federation', u, p);
+    }
+    if(!result.ok){
+      throw new Error(result.error || 'بيانات الدخول غير صحيحة. تأكد من اسم الدخول وكلمة المرور.');
+    }
+    localStorage.setItem('authToken', result.json.token);
+    await loadDataAndStart(result.json.token, result.json.auth);
   }catch(err){
     loginErrorBox.textContent = err.message || 'تعذّر تسجيل الدخول. تأكد من اتصال السيرفر.';
     loginErrorBox.style.display='block';
@@ -2320,7 +2300,7 @@ async function attemptLogin(){
   }
 }
 loginSubmitBtn.addEventListener('click', attemptLogin);
-[loginFedUser, loginFedPass, loginRevUser, loginRevPass].forEach(inp=>{
+[loginUser, loginPass].forEach(inp=>{
   inp.addEventListener('keydown', e=>{ if(e.key==='Enter') attemptLogin(); });
 });
 
