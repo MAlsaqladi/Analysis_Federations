@@ -6,6 +6,7 @@
 <title>منصة التحليل المالي والتشغيلي | الاتحادات الرياضية</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
   --forest:#0f2f21; --forest-2:#1c4a34; --emerald:#2f7a56; --mint:#8fd9b6; --mint-soft:#e9f6ef;
@@ -235,6 +236,7 @@ footer .logoline{font-weight:800; color:var(--forest); font-family:'Cairo',sans-
       <div class="fy-badge" id="authBadge" style="display:none;"></div>
       <div class="fy-badge">السنة المالية 2026م</div>
       <button class="reupload-btn" id="printReportBtn">🖨️ طباعة تقرير شامل</button>
+      <button class="reupload-btn" id="exportExcelBtn">📊 تصدير إلى إكسل</button>
       <button class="reupload-btn" id="switchUserBtn">🚪 تسجيل خروج</button>
     </div>
   </div>
@@ -2255,6 +2257,376 @@ table.datatable th, table.datatable td{padding:5px 7px; white-space:normal;}
   win.onload = ()=>{ setTimeout(()=> win.print(), 400); };
 }
 printReportBtn.addEventListener('click', printFullReport);
+
+/* ================= تصدير تقرير شامل إلى إكسل (أرقام ونصوص منسّقة بالألوان، بدون رسوم بيانية) ================= */
+const exportExcelBtn = document.getElementById('exportExcelBtn');
+
+/* بيانات رأس التقرير (نوع المستخدم، التاريخ، الفلاتر) — نفس المنطق المستخدم بالطباعة، هنا كدالة مشتركة قابلة لإعادة الاستخدام */
+function getReportMeta(){
+  const roleLabel = AUTH.role==='admin' ? 'مدير (كل الاتحادات)' : AUTH.role==='reviewer' ? ('مراجع — '+(AUTH.reviewerName||'')) : ('اتحاد — '+(FEDMETA[AUTH.fedId]?.nameAr || AUTH.fedId));
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB');
+  const filtersText = activeFiltersSummaryText();
+  return {roleLabel, dateStr, filtersText};
+}
+
+const XL_COLORS = {
+  headerFill: 'FF0F2F21', headerText: 'FFFFFFFF',
+  titleText: 'FF0F2F21', mutedText: 'FF6B7A70',
+  goldFill: 'FFC6A15B', goldText: 'FF3D2F14',
+  stripeFill: 'FFF6F3E9', borderColor: 'FFE2DCC7',
+  green: 'FF1C6B45', red: 'FFB3503F', black: 'FF1A1A1A',
+};
+
+function xlSheet(wb, name){
+  return wb.addWorksheet(name, {views:[{rightToLeft:true, showGridLines:false}]});
+}
+
+/* يكتب صفي عنوان (اسم القسم + سطر معلومات التقرير) أعلى كل ورقة */
+function xlWriteHeader(ws, colCount, sectionTitle){
+  ws.mergeCells(1,1,1,colCount);
+  const t = ws.getCell(1,1);
+  t.value = 'منصة التحليل المالي والتشغيلي للاتحادات — ' + sectionTitle;
+  t.font = {name:'Arial', size:13, bold:true, color:{argb:XL_COLORS.titleText}};
+  t.alignment = {horizontal:'right', vertical:'middle'};
+  ws.getRow(1).height = 24;
+
+  const meta = getReportMeta();
+  ws.mergeCells(2,1,2,colCount);
+  const m = ws.getCell(2,1);
+  m.value = `نوع المستخدم: ${meta.roleLabel}   |   تاريخ التصدير: ${meta.dateStr}   |   الفلاتر: ${meta.filtersText}`;
+  m.font = {name:'Arial', size:9.5, color:{argb:XL_COLORS.mutedText}};
+  m.alignment = {horizontal:'right', vertical:'middle'};
+  ws.getRow(2).height = 18;
+  ws.addRow([]);
+  return 4; /* رقم أول صف فارغ متاح بعد الرأس */
+}
+
+/* يكتب عنوان جدول فرعي (شريط ملوّن) */
+function xlTableTitle(ws, row, colCount, text){
+  ws.mergeCells(row,1,row,colCount);
+  const c = ws.getCell(row,1);
+  c.value = text;
+  c.font = {name:'Arial', size:11, bold:true, color:{argb:XL_COLORS.headerText}};
+  c.fill = {type:'pattern', pattern:'solid', fgColor:{argb:XL_COLORS.headerFill}};
+  c.alignment = {horizontal:'right', vertical:'middle'};
+  ws.getRow(row).height = 20;
+  return row+1;
+}
+
+/* يكتب جدول بيانات كامل (رأس أعمدة + صفوف)، مع تلوين خلايا الانحراف (أخضر/أحمر حسب الإشارة) وتخطيط زيبرا خفيف.
+   columns: [{header, width, key, numFmt, diff}] — diff:true يعني هذا العمود يُلوّن حسب الإشارة (موجب أخضر/سالب أحمر) */
+function xlTable(ws, startRow, columns, dataRows){
+  const headerRow = ws.getRow(startRow);
+  columns.forEach((col,i)=>{
+    ws.getColumn(i+1).width = col.width || 14;
+    const c = headerRow.getCell(i+1);
+    c.value = col.header;
+    c.font = {name:'Arial', size:10, bold:true, color:{argb:XL_COLORS.headerText}};
+    c.fill = {type:'pattern', pattern:'solid', fgColor:{argb:XL_COLORS.headerFill}};
+    c.alignment = {horizontal:'center', vertical:'middle', wrapText:true};
+  });
+  headerRow.height = 26;
+  ws.views = [{rightToLeft:true, showGridLines:false, state:'frozen', ySplit:startRow}];
+
+  dataRows.forEach((rowData, ri)=>{
+    const row = ws.getRow(startRow+1+ri);
+    columns.forEach((col,ci)=>{
+      const cell = row.getCell(ci+1);
+      const val = rowData[col.key];
+      cell.value = (val===undefined || val===null) ? null : val;
+      cell.font = {name:'Arial', size:10, color:{argb:XL_COLORS.black}};
+      cell.alignment = {horizontal: (typeof val==='number') ? 'center' : 'right', vertical:'middle'};
+      if(col.numFmt) cell.numFmt = col.numFmt;
+      if(ri % 2 === 1){
+        cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:XL_COLORS.stripeFill}};
+      }
+      if(col.diff && typeof val==='number'){
+        cell.font = {name:'Arial', size:10, bold:true, color:{argb: val>0? XL_COLORS.green : (val<0? XL_COLORS.red : XL_COLORS.mutedText)}};
+      }
+      cell.border = {bottom:{style:'thin', color:{argb:XL_COLORS.borderColor}}};
+    });
+  });
+  return startRow + 1 + dataRows.length + 2; /* رقم أول صف فارغ متاح بعد الجدول (+ سطر فاصل) */
+}
+
+function xlPct(actual, ref){
+  if(actual==null || actual===0 || ref==null) return null;
+  return ((ref-actual)/Math.abs(actual)); /* نسبة مخزّنة كجزء عشري ليقرأها تنسيق % بإكسل */
+}
+
+async function exportToExcel(){
+  exportExcelBtn.disabled = true;
+  exportExcelBtn.textContent = '⏳ جاري تجهيز الملف...';
+  loaderOverlay.style.display = 'flex';
+  document.getElementById('loaderText').textContent = 'جاري تجهيز ملف الإكسل — الرجاء الانتظار...';
+
+  const originalLocal = JSON.parse(JSON.stringify(LOCAL));
+  clearLocal();
+
+  try{
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'منصة التحليل المالي والتشغيلي للاتحادات';
+    wb.created = new Date();
+
+    /* ---------- ورقة 1: نظرة عامة ---------- */
+    {
+      const ws = xlSheet(wb, 'نظرة عامة');
+      let r = xlWriteHeader(ws, 4, 'نظرة عامة');
+      const fin = finRows();
+      const {actual, budget, diff} = sumFin(fin);
+      const acts = actRows(null, false);
+      const tPlayersExp = acts.reduce((s,a)=>s+a.expPlayers,0);
+      const tPlayersAct = acts.reduce((s,a)=>s+a.actPlayers,0);
+      const tourns = acts.filter(a=>a.isTournament);
+      const medExp = tourns.reduce((s,a)=>s+(a.medExp||0),0);
+      const medAct = tourns.reduce((s,a)=>s+(a.medAct||0),0);
+      const diffPlayers = tPlayersExp-tPlayersAct;
+      const diffMedals = medAct-medExp;
+
+      r = xlTableTitle(ws, r, 4, 'الملخص المالي والتشغيلي');
+      r = xlTable(ws, r, [
+        {header:'البند', key:'label', width:26},
+        {header:'الفعلي', key:'actual', width:16, numFmt:'#,##0'},
+        {header:'التقديري (الموازنة)', key:'budget', width:18, numFmt:'#,##0'},
+        {header:'الانحراف', key:'diff', width:16, numFmt:'#,##0', diff:true},
+      ], [
+        {label:'المبلغ (ر.س)', actual, budget, diff},
+        {label:'اللاعبون', actual:tPlayersAct, budget:tPlayersExp, diff:diffPlayers},
+        {label:'الميداليات', actual:medAct, budget:medExp, diff:diffMedals},
+      ]);
+
+      r = xlTableTitle(ws, r, 4, 'نسب الانحراف');
+      r = xlTable(ws, r, [
+        {header:'البند', key:'label', width:26},
+        {header:'نسبة الانحراف', key:'pct', width:16, numFmt:'0.0%', diff:true},
+        {header:'', key:'blank1', width:16},
+        {header:'', key:'blank2', width:16},
+      ], [
+        {label:'المبلغ', pct: xlPct(actual,budget)},
+        {label:'اللاعبون', pct: xlPct(tPlayersAct,tPlayersExp)},
+        {label:'الميداليات', pct: xlPct(medAct,medExp)},
+      ]);
+
+      const nCountries = new Set(acts.map(a=>a.country)).size;
+      const nCities = new Set(acts.map(a=>a.city)).size;
+      const nFeds = new Set(acts.map(a=>a.fedId)).size || (GF.fed.length ? GF.fed.length : FED.length);
+      const staffTotal = acts.reduce((s,a)=>s+a.staff,0);
+      const genderCounts = {};
+      GENDERS.forEach(g=> genderCounts[g] = acts.filter(a=>a.genderLabel===g).reduce((s,a)=>s+a.actPlayers,0));
+
+      r = xlTableTitle(ws, r, 4, 'مؤشرات عامة');
+      r = xlTable(ws, r, [
+        {header:'المؤشر', key:'label', width:26},
+        {header:'القيمة', key:'val', width:16, numFmt:'#,##0'},
+        {header:'', key:'blank1', width:16},
+        {header:'', key:'blank2', width:16},
+      ], [
+        {label:'عدد الفعاليات', val: acts.length},
+        {label:'عدد الاتحادات', val: nFeds},
+        {label:'عدد الدول', val: nCountries},
+        {label:'عدد المدن', val: nCities},
+        {label:'الجهاز الفني والإداري', val: staffTotal},
+        ...GENDERS.map(g=> ({label:'لاعبون — '+g, val: genderCounts[g]})),
+      ]);
+    }
+
+    /* ---------- ورقة 2: تحليل المصاريف ---------- */
+    {
+      const ws = xlSheet(wb, 'تحليل المصاريف');
+      let r = xlWriteHeader(ws, 5, 'تحليل المصاريف');
+      const finBase = finRows();
+      const byL2 = groupSumFin(finBase, r2=>r2.level2);
+      const byL5 = mapToSorted(groupSumFin(finBase, r2=>r2.level5));
+      const {actual: totalActual} = sumFin(finBase);
+
+      r = xlTableTitle(ws, r, 5, 'فني مقابل تشغيلي');
+      r = xlTable(ws, r, [
+        {header:'النوع', key:'label', width:20},
+        {header:'الفعلي', key:'actual', width:16, numFmt:'#,##0'},
+        {header:'الموازنة', key:'budget', width:16, numFmt:'#,##0'},
+        {header:'الانحراف', key:'diff', width:16, numFmt:'#,##0', diff:true},
+        {header:'% من الإجمالي الفعلي', key:'pct', width:18, numFmt:'0.0%'},
+      ], [...byL2.keys()].map(k=>{
+        const o = byL2.get(k);
+        return {label:k, actual:o.actual, budget:o.budget, diff:o.budget-o.actual, pct: totalActual? o.actual/totalActual : null};
+      }));
+
+      r = xlTableTitle(ws, r, 5, 'تفصيل بنود الصرف (المستوى الخامس)');
+      r = xlTable(ws, r, [
+        {header:'البند', key:'label', width:32},
+        {header:'الفعلي', key:'actual', width:16, numFmt:'#,##0'},
+        {header:'الموازنة', key:'budget', width:16, numFmt:'#,##0'},
+        {header:'الانحراف', key:'diff', width:16, numFmt:'#,##0', diff:true},
+        {header:'نسبة الانحراف', key:'pct', width:16, numFmt:'0.0%', diff:true},
+      ], byL5.map(([k,o])=> ({label:k, actual:o.actual, budget:o.budget, diff:o.budget-o.actual, pct: xlPct(o.actual,o.budget)})));
+    }
+
+    /* ---------- ورقة 3: البطولات والمعسكرات ---------- */
+    {
+      const ws = xlSheet(wb, 'البطولات والمعسكرات');
+      let r = xlWriteHeader(ws, 16, 'البطولات والمعسكرات — تفصيل كامل للمشاركات');
+      const acts = actRows(null, false);
+      r = xlTable(ws, r, [
+        {header:'الاتحاد', key:'fed', width:26},
+        {header:'اسم الفعالية', key:'name', width:34},
+        {header:'النوع', key:'type', width:10},
+        {header:'التصنيف', key:'classification', width:12},
+        {header:'الدولة', key:'country', width:16},
+        {header:'المدينة', key:'city', width:14},
+        {header:'الجنس', key:'gender', width:14},
+        {header:'الفئة', key:'partCat', width:16},
+        {header:'الأيام', key:'days', width:9, numFmt:'#,##0'},
+        {header:'الجهاز الفني', key:'staff', width:12, numFmt:'#,##0'},
+        {header:'لاعبون متوقع', key:'expP', width:12, numFmt:'#,##0'},
+        {header:'لاعبون فعلي', key:'actP', width:12, numFmt:'#,##0'},
+        {header:'انحراف اللاعبين', key:'diffP', width:14, numFmt:'#,##0', diff:true},
+        {header:'ميداليات متوقع', key:'medExp', width:12, numFmt:'#,##0'},
+        {header:'ميداليات فعلي', key:'medAct', width:12, numFmt:'#,##0'},
+        {header:'التكلفة الفعلية', key:'cost', width:16, numFmt:'#,##0'},
+      ], acts.map(a=>{
+        const fed = FEDMETA[a.fedId];
+        return {
+          fed: fed? fed.nameAr : a.fedId, name:a.name, type: a.isCamp?'معسكر':'بطولة',
+          classification:a.classification, country:a.country, city:a.city, gender:a.genderLabel,
+          partCat:a.partCat, days:a.days, staff:a.staff, expP:a.expPlayers, actP:a.actPlayers,
+          diffP: a.expPlayers-a.actPlayers,
+          medExp: a.hasMedals? a.medExp : null, medAct: a.hasMedals? a.medAct : null,
+          cost: a.actualCost,
+        };
+      }));
+    }
+
+    /* ---------- ورقة 4: تحليل الفئات (الجنس + الفئة العمرية) ---------- */
+    {
+      const ws = xlSheet(wb, 'تحليل الفئات');
+      let r = xlWriteHeader(ws, 6, 'تحليل الفئات — حسب الجنس والفئة العمرية');
+      const acts = actRows(null, false);
+
+      r = xlTableTitle(ws, r, 6, 'حسب الجنس');
+      const genderRows = GENDERS.map(g=>{
+        const rows = acts.filter(a=>a.genderLabel===g);
+        const trs = rows.filter(a=>a.isTournament);
+        return {
+          label:g, activities: rows.length,
+          expP: rows.reduce((s,a)=>s+a.expPlayers,0), actP: rows.reduce((s,a)=>s+a.actPlayers,0),
+          medExp: trs.reduce((s,a)=>s+(a.medExp||0),0), medAct: trs.reduce((s,a)=>s+(a.medAct||0),0),
+          staff: rows.reduce((s,a)=>s+a.staff,0), cost: rows.reduce((s,a)=>s+a.actualCost,0),
+        };
+      });
+      r = xlTable(ws, r, [
+        {header:'الجنس', key:'label', width:18},
+        {header:'عدد الفعاليات', key:'activities', width:14, numFmt:'#,##0'},
+        {header:'لاعبون متوقع', key:'expP', width:12, numFmt:'#,##0'},
+        {header:'لاعبون فعلي', key:'actP', width:12, numFmt:'#,##0'},
+        {header:'ميداليات فعلي', key:'medAct', width:12, numFmt:'#,##0'},
+        {header:'التكلفة الفعلية', key:'cost', width:16, numFmt:'#,##0'},
+      ], genderRows);
+
+      r = xlTableTitle(ws, r, 6, 'حسب الفئة العمرية');
+      const ageCats = [...new Set(acts.map(a=>a.partCat))];
+      const ageRows = ageCats.map(c=>{
+        const o = ageCardStats(acts, c);
+        return {label:c, activities:o.count, expP:o.expPlayers, actP:o.actPlayers, medExp:o.medExp, medAct:o.medAct, actual:o.actual};
+      }).sort((a,b)=> b.activities-a.activities);
+      r = xlTable(ws, r, [
+        {header:'الفئة العمرية', key:'label', width:20},
+        {header:'عدد الفعاليات', key:'activities', width:14, numFmt:'#,##0'},
+        {header:'لاعبون متوقع', key:'expP', width:12, numFmt:'#,##0'},
+        {header:'لاعبون فعلي', key:'actP', width:12, numFmt:'#,##0'},
+        {header:'ميداليات فعلي', key:'medAct', width:12, numFmt:'#,##0'},
+        {header:'التكلفة الفعلية', key:'actual', width:16, numFmt:'#,##0'},
+      ], ageRows);
+    }
+
+    /* ---------- ورقة 5: الدول والمدن ---------- */
+    {
+      const ws = xlSheet(wb, 'الدول والمدن');
+      let r = xlWriteHeader(ws, 8, 'الدول والمدن');
+      const acts = actRows(null, false);
+      const cityKeys = [...new Set(acts.map(a=> a.city+'|||'+a.country))];
+      const byCity = cityKeys.map(k=>{
+        const [city,country] = k.split('|||');
+        const rows = acts.filter(a=>a.city===city && a.country===country);
+        const trs = rows.filter(a=>a.isTournament);
+        const cost = rows.reduce((s,a)=>s+a.actualCost,0);
+        return {
+          city, country, count: rows.length,
+          expP: rows.reduce((s,a)=>s+a.expPlayers,0), actP: rows.reduce((s,a)=>s+a.actPlayers,0),
+          diffP: 0, medAct: trs.reduce((s,a)=>s+(a.medAct||0),0), cost,
+          avgCost: rows.length? cost/rows.length : 0,
+        };
+      }).sort((a,b)=> b.count-a.count);
+      byCity.forEach(o=> o.diffP = o.expP-o.actP);
+
+      r = xlTable(ws, r, [
+        {header:'المدينة', key:'city', width:18},
+        {header:'الدولة', key:'country', width:20},
+        {header:'عدد الفعاليات', key:'count', width:12, numFmt:'#,##0'},
+        {header:'لاعبون متوقع', key:'expP', width:12, numFmt:'#,##0'},
+        {header:'لاعبون فعلي', key:'actP', width:12, numFmt:'#,##0'},
+        {header:'انحراف اللاعبين', key:'diffP', width:14, numFmt:'#,##0', diff:true},
+        {header:'الميداليات الفعلية', key:'medAct', width:14, numFmt:'#,##0'},
+        {header:'التكلفة الفعلية', key:'cost', width:16, numFmt:'#,##0'},
+      ], byCity);
+    }
+
+    /* ---------- ورقة 6: الاتحادات (تظهر فقط للمدير/المراجع الذي يشرف على أكثر من اتحاد) ---------- */
+    if(AUTH.role!=='fed'){
+      const ws = xlSheet(wb, 'الاتحادات');
+      let r = xlWriteHeader(ws, 12, 'الاتحادات — مقارنة شاملة');
+      const feds = FED.filter(f=> matchesFed(f.id)).sort((a,b)=>a.nameAr.localeCompare(b.nameAr,'ar'));
+      const rowsData = feds.map(f=>{
+        const rows = fedRowsFor(f.id);
+        const fin = fedFinFor(f.id);
+        const {actual, budget, diff} = sumFin(fin);
+        const trs = rows.filter(a=>a.isTournament);
+        const actP = rows.reduce((s,a)=>s+a.actPlayers,0);
+        const medAct = trs.reduce((s,a)=>s+(a.medAct||0),0);
+        return {
+          nameAr:f.nameAr, nameEn:f.nameEn||'—', stream:f.stream, tier:f.tier,
+          category:f.category, size:f.size, actual, budget, diff,
+          count: rows.length, actP, medAct,
+        };
+      }).sort((a,b)=> b.actual-a.actual);
+
+      r = xlTable(ws, r, [
+        {header:'الاسم (عربي)', key:'nameAr', width:26},
+        {header:'الاسم (EN)', key:'nameEn', width:22},
+        {header:'Stream', key:'stream', width:12},
+        {header:'Tier', key:'tier', width:8},
+        {header:'الفئة', key:'category', width:12},
+        {header:'الحجم', key:'size', width:10},
+        {header:'الفعلي', key:'actual', width:14, numFmt:'#,##0'},
+        {header:'الموازنة', key:'budget', width:14, numFmt:'#,##0'},
+        {header:'الانحراف', key:'diff', width:14, numFmt:'#,##0', diff:true},
+        {header:'عدد الفعاليات', key:'count', width:12, numFmt:'#,##0'},
+        {header:'اللاعبون الفعليون', key:'actP', width:14, numFmt:'#,##0'},
+        {header:'الميداليات الفعلية', key:'medAct', width:14, numFmt:'#,##0'},
+      ], rowsData);
+    }
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'تقرير_شامل_منصة_التحليل_المالي_والتشغيلي.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+  }catch(err){
+    console.error(err);
+    alert('حدث خطأ أثناء تجهيز ملف الإكسل. حاول مرة أخرى.');
+  }finally{
+    LOCAL = originalLocal;
+    loaderOverlay.style.display = 'none';
+    exportExcelBtn.disabled = false;
+    exportExcelBtn.textContent = '📊 تصدير إلى إكسل';
+  }
+}
+exportExcelBtn.addEventListener('click', exportToExcel);
 
 /* ================= LOGIN SCREEN (نموذج موحّد: يجرّب أولاً كمراجع/مدير، وإن لم يوجد يجرّب كاتحاد) ================= */
 const loginScreen = document.getElementById('loginScreen');
