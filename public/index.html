@@ -22,11 +22,14 @@ h1,h2,h3,h4{font-family:'Cairo',sans-serif;}
 a{color:inherit;}
 
 .upload-screen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
-  background:linear-gradient(150deg,var(--forest) 0%, var(--forest-2) 55%, #0a2318 100%); position:relative; overflow:hidden;}
+  background-color:var(--forest);
+  background-image:linear-gradient(150deg,rgba(15,47,33,.88) 0%, rgba(28,74,52,.8) 55%, rgba(10,35,24,.92) 100%), url('header-bg.jpg');
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+  position:relative; overflow:hidden;}
 .upload-screen::before{content:"";position:absolute; inset:0; opacity:.08; pointer-events:none;
   background-image:repeating-linear-gradient(115deg,transparent 0 26px,rgba(255,255,255,.6) 26px 27px), repeating-linear-gradient(25deg,transparent 0 34px,rgba(255,255,255,.4) 34px 35px);}
 .upload-card{position:relative; background:#fff; border-radius:22px; padding:40px 36px; max-width:560px; width:100%; box-shadow:0 30px 60px -20px rgba(0,0,0,.4); text-align:center;}
-.upload-card .emblem2{width:56px; height:64px; margin:0 auto 14px;}
+.upload-card .emblem2{height:72px; width:auto; max-width:230px; object-fit:contain; margin:0 auto 14px; display:block;}
 .upload-card h1{margin:0 0 6px; font-size:21px; color:var(--forest); font-weight:800;}
 .upload-card p.lead{margin:0 0 22px; font-size:13px; color:var(--muted);}
 .dropzone{border:2px dashed var(--gold); border-radius:16px; padding:32px 20px; cursor:pointer; transition:.2s;}
@@ -43,12 +46,16 @@ a{color:inherit;}
 .spinner{width:38px; height:38px; border:4px solid rgba(255,255,255,.25); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-header.top{background:linear-gradient(120deg,var(--forest),var(--forest-2) 60%,#0a2318); color:#fff; padding:18px clamp(14px,4vw,44px) 0; position:relative; overflow:hidden;}
+header.top{
+  background-color:var(--forest);
+  background-image:linear-gradient(120deg,rgba(15,47,33,.88),rgba(28,74,52,.78) 60%,rgba(10,35,24,.92)), url('header-bg.jpg');
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+  color:#fff; padding:18px clamp(14px,4vw,44px) 0; position:relative; overflow:hidden;}
 header.top::before{content:"";position:absolute; inset:0; opacity:.08; pointer-events:none;
   background-image:repeating-linear-gradient(115deg,transparent 0 26px,rgba(255,255,255,.6) 26px 27px), repeating-linear-gradient(25deg,transparent 0 34px,rgba(255,255,255,.4) 34px 35px);}
 .top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; position:relative;}
 .brand{display:flex; align-items:center; gap:12px;}
-.emblem{width:40px; height:46px; flex:none;}
+.emblem{height:48px; width:auto; max-width:170px; object-fit:contain; flex:none;}
 .brand h1{margin:0; font-size:clamp(17px,2.1vw,22px); font-weight:800;}
 .brand p{margin:1px 0 0; font-size:12px; color:var(--mint);}
 .fy-badge{background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.2); padding:7px 15px; border-radius:999px; font-size:12.5px; color:var(--gold-soft); font-weight:600;}
@@ -195,13 +202,7 @@ footer .logoline{font-weight:800; color:var(--forest); font-family:'Cairo',sans-
 
 <div class="upload-screen" id="loginScreen">
   <div class="upload-card" style="max-width:440px;">
-    <svg class="emblem2" viewBox="0 0 100 116" fill="none">
-      <rect x="4" y="4" width="92" height="100" rx="10" stroke="#123626" stroke-width="4"/>
-      <ellipse cx="50" cy="52" rx="34" ry="40" stroke="#123626" stroke-width="3.5"/>
-      <path d="M50 24 C40 40 40 55 50 70 C60 55 60 40 50 24Z" fill="#123626"/>
-      <path d="M50 30 C34 40 22 46 12 46 C22 54 36 56 50 46Z" fill="#123626" opacity=".85"/>
-      <path d="M50 30 C66 40 78 46 88 46 C78 54 64 56 50 46Z" fill="#123626" opacity=".85"/>
-    </svg>
+    <img class="emblem2" src="logo.png" alt="شعار المنصة" onerror="this.style.display='none';">
     <h1>منصة التحليل المالي والتشغيلي للاتحادات</h1>
     <p class="lead">اختر نوع الدخول ثم أدخل بيانات الدخول للمتابعة إلى التحليل — البيانات تُقرأ مباشرة من قاعدة البيانات</p>
 
@@ -242,13 +243,7 @@ footer .logoline{font-weight:800; color:var(--forest); font-family:'Cairo',sans-
 
   <div class="top-row">
     <div class="brand">
-      <svg class="emblem" viewBox="0 0 100 116" fill="none">
-        <rect x="4" y="4" width="92" height="100" rx="10" stroke="#8fd9b6" stroke-width="4"/>
-        <ellipse cx="50" cy="52" rx="34" ry="40" stroke="#8fd9b6" stroke-width="3.5"/>
-        <path d="M50 24 C40 40 40 55 50 70 C60 55 60 40 50 24Z" fill="#8fd9b6"/>
-        <path d="M50 30 C34 40 22 46 12 46 C22 54 36 56 50 46Z" fill="#8fd9b6" opacity=".9"/>
-        <path d="M50 30 C66 40 78 46 88 46 C78 54 64 56 50 46Z" fill="#8fd9b6" opacity=".9"/>
-      </svg>
+      <img class="emblem" src="logo.png" alt="شعار المنصة" onerror="this.style.display='none';">
       <div>
         <h1>منصة التحليل المالي والتشغيلي للاتحادات</h1>
         <p>اللجنة الأولمبية والبارالمبية السعودية — بيانات حية من ملف الإكسل</p>
@@ -294,11 +289,11 @@ const PALETTE = {forest:"#0f2f21", forest2:"#1c4a34", emerald:"#2f7a56", mint:"#
 const PAL_LIST = [PALETTE.forest, PALETTE.emerald, PALETTE.gold, PALETTE.mint, PALETTE.red, PALETTE.navy, PALETTE.pink, PALETTE.sand, "#7a5c8f", "#4f8fa6"];
 
 const $ = s => document.querySelector(s);
-const fmt = n => (n==null||isNaN(n) ? "—" : Math.round(n).toLocaleString('ar-EG'));
-const fmt1 = n => (n==null||isNaN(n) ? "—" : Number(n).toLocaleString('ar-EG',{maximumFractionDigits:1}));
-const fmtM = n => (n==null||isNaN(n) ? "—" : (n/1e6).toLocaleString('ar-EG',{maximumFractionDigits:2})+" م.ر");
+const fmt = n => (n==null||isNaN(n) ? "—" : Math.round(n).toLocaleString('en-US'));
+const fmt1 = n => (n==null||isNaN(n) ? "—" : Number(n).toLocaleString('en-US',{maximumFractionDigits:1}));
+const fmtM = n => (n==null||isNaN(n) ? "—" : (n/1e6).toLocaleString('en-US',{maximumFractionDigits:2})+" م.ر");
 const fmtSAR = n => (n==null||isNaN(n) ? "—" : fmt(n)+" ر.س");
-const pctStr = n => (n==null||isNaN(n) ? "—" : n.toLocaleString('ar-EG',{maximumFractionDigits:1})+"٪");
+const pctStr = n => (n==null||isNaN(n) ? "—" : n.toLocaleString('en-US',{maximumFractionDigits:1})+"٪");
 
 /* deviation badge: negative -> red, positive -> green, zero -> neutral (per platform convention) */
 function diffBadge(diff, {isCurrency=false, isPct=false}={}){
@@ -462,7 +457,7 @@ function actRows(extra, useLocal=true){ return ACT.filter(a=> matchesACT(a,useLo
 function sumFin(rows){
   let actual=0, budget=0;
   rows.forEach(r=>{ if(r.isBudget) budget+=r.amount; else actual+=r.amount; });
-  return {actual, budget, diff: actual-budget};
+  return {actual, budget, diff: budget-actual};
 }
 function groupSumFin(rows, keyFn){
   const m = new Map();
@@ -773,7 +768,7 @@ function fullActivitiesTableHTML(acts, {title='تفصيل كامل للمشار�
       <td>${fmt(a.staff)}</td>
       <td>${fmt(a.expPlayers)}</td>
       <td>${fmt(a.actPlayers)}</td>
-      <td>${diffBadge(a.actPlayers-a.expPlayers)}</td>
+      <td>${diffBadge(a.expPlayers-a.actPlayers)}</td>
       <td>${a.hasMedals ? `${fmt(a.expGold||0)}/${fmt(a.actGold||0)}` : '—'}</td>
       <td>${a.hasMedals ? `${fmt(a.expSilver||0)}/${fmt(a.actSilver||0)}` : '—'}</td>
       <td>${a.hasMedals ? `${fmt(a.expBronze||0)}/${fmt(a.actBronze||0)}` : '—'}</td>
@@ -1236,7 +1231,7 @@ function pageOverview(){
   const nCities = new Set(acts.map(a=>a.city)).size;
   const nFeds = new Set(acts.map(a=>a.fedId)).size || (GF.fed.length ? GF.fed.length : FED.length);
 
-  const diffPlayers = tPlayersAct-tPlayersExp;
+  const diffPlayers = tPlayersExp-tPlayersAct;
   const diffMedals = medAct-medExp;
 
   /* tournaments-only cost per player — actual & estimated, amounts only */
@@ -1266,11 +1261,11 @@ function pageOverview(){
       <div class="cat-row"><span>متوسط تكلفة اللاعب التقديري (بطولات فقط)</span><b>${costPerExpectedPlayerT!=null? fmt(costPerExpectedPlayerT):'—'}</b></div>
       <span class="pill" style="background:var(--gold-soft); color:#8c6d2f;">بطولات فقط للميداليات والمتوسط</span>
     </div>
-    <div class="cat-card" style="border-top:3px solid ${diff>0?'var(--red)':'var(--green)'};">
-      <h4>📊 الانحراف (الفعلي − التقديري)</h4>
-      <div class="cat-row"><span>فرق المبلغ</span><b>${diffBadge(diff)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(actual,budget)}</span></b></div>
-      <div class="cat-row"><span>فرق اللاعبين</span><b>${diffBadge(diffPlayers)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(tPlayersAct,tPlayersExp)}</span></b></div>
-      <div class="cat-row"><span>فرق الميداليات</span><b>${diffBadge(diffMedals)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(medAct,medExp)}</span></b></div>
+    <div class="cat-card" style="border-top:3px solid ${diff<0?'var(--red)':'var(--green)'};">
+      <h4>📊 الانحراف</h4>
+      <div class="cat-row"><span>فرق المبلغ (تقديري − فعلي)</span><b>${diffBadge(diff)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(actual,budget)}</span></b></div>
+      <div class="cat-row"><span>فرق اللاعبين (تقديري − فعلي)</span><b>${diffBadge(diffPlayers)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(tPlayersAct,tPlayersExp)}</span></b></div>
+      <div class="cat-row"><span>فرق الميداليات (فعلي − تقديري)</span><b>${diffBadge(diffMedals)} <span style="color:var(--muted); font-weight:600;">${diffBadgePct(medAct,medExp)}</span></b></div>
     </div>
   </div>
 
@@ -1400,7 +1395,7 @@ function pageExpenses(){
       <td>${k}</td>
       <td>${fmt(o.actual)}</td>
       <td>${fmt(o.budget)}</td>
-      <td>${diffBadge(o.actual-o.budget)}</td>
+      <td>${diffBadge(o.budget-o.actual)}</td>
       <td>${diffBadgePct(o.actual,o.budget)}</td>
     </tr>`).join('');
 
@@ -1409,7 +1404,7 @@ function pageExpenses(){
   <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
     ${kpi('إجمالي الفعلي', fmtSAR(actual), '', 'accent')}
     ${kpi('إجمالي الموازنة', fmtSAR(budget), '', 'gold')}
-    ${kpi('الانحراف', diffBadge(diff), diff>=0?'تجاوز الموازنة':'أقل من الموازنة')}
+    ${kpi('الانحراف', diffBadge(diff), diff<0?'تجاوز الموازنة':'أقل من الموازنة')}
     ${kpi('نسبة الانحراف', diffBadgePct(actual,budget))}
   </div>
 
@@ -1420,7 +1415,7 @@ function pageExpenses(){
   <div class="grid2">
     ${[...byL2.keys()].map(k=>{
       const o = byL2.get(k);
-      const diffL2 = o.actual - o.budget;
+      const diffL2 = o.budget - o.actual;
       const pct = actual? (o.actual/actual*100) : null;
       const active = LOCAL.level2===k;
       return `<div class="cat-card ${active?'active-card':''}" data-level2="${k}" style="cursor:pointer;">
@@ -1669,7 +1664,7 @@ function pageGender(){
       <td>${fmt(o.expP)}</td>
       <td>${fmt(o.actP)}</td>
       <td>${totActP? pctStr(o.actP/totActP*100):'—'}</td>
-      <td>${diffBadge(o.actP-o.expP)}</td>
+      <td>${diffBadge(o.expP-o.actP)}</td>
       <td>${fmt(o.medExp)}</td>
       <td>${fmt(o.medAct)}</td>
       <td>${totMedAct? pctStr(o.medAct/totMedAct*100):'—'}</td>
@@ -1767,7 +1762,7 @@ function pageGeo(){
       <td>${fmt(o.count)}</td>
       <td>${fmt(o.expP)}</td>
       <td>${fmt(o.actP)}</td>
-      <td>${diffBadge(o.actP-o.expP)}</td>
+      <td>${diffBadge(o.expP-o.actP)}</td>
       <td>${fmt(o.medAct)}</td>
       <td>${fmt(o.cost)}</td>
       <td>${fmt(o.avgCost)}</td>
@@ -1963,7 +1958,7 @@ function fedDeviationTableHTML(stats, mode){
       <td>${o.label}</td>
       <td>${fmt(exp)}</td>
       <td>${fmt(act)}</td>
-      <td>${diffBadge(act-exp)}</td>
+      <td>${diffBadge(mode==='medals' ? (act-exp) : (exp-act))}</td>
       <td>${diffBadgePct(act, exp)}</td>
     </tr>`;
   }).join('');
@@ -2119,11 +2114,38 @@ function activeFiltersSummaryText(){
   const chips = chipsWrap ? [...chipsWrap.querySelectorAll('.chip')].map(c=> c.textContent.replace('✕','').trim()) : [];
   return chips.length ? chips.join(' — ') : 'بدون فلاتر (عرض كل البيانات)';
 }
+/* يحوّل شعار الرأس الحالي (المعروض فعلياً في الواجهة) إلى صورة Base64 حتى يمكن تضمينه داخل نافذة الطباعة المستقلة
+   (نافذة الطباعة مستند منفصل ولا يستطيع الوصول لملف logo.png عبر مسار نسبي بشكل موثوق، فنحوّله لصورة جاهزة بدلاً من ذلك) */
+function getLogoDataUrl(){
+  const img = document.querySelector('header.top .emblem');
+  if(!img || !img.complete || !img.naturalWidth) return '';
+  try{
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    return c.toDataURL('image/png');
+  }catch(e){ return ''; }
+}
+function letterheadHTML(logoDataUrl, roleLabel, dateStr, filtersText){
+  return `<div class="print-letterhead">
+    ${logoDataUrl? `<img src="${logoDataUrl}" alt="الشعار" class="print-logo">` : ''}
+    <div class="print-letterhead-text">
+      <div class="print-letterhead-title">منصة التحليل المالي والتشغيلي للاتحادات</div>
+      <div class="print-letterhead-sub">اللجنة الأولمبية والبارالمبية السعودية — تقرير شامل</div>
+      <div class="print-letterhead-meta">نوع المستخدم: ${roleLabel} &nbsp;|&nbsp; تاريخ الطباعة: ${dateStr} &nbsp;|&nbsp; الفلاتر: ${filtersText}</div>
+    </div>
+  </div>`;
+}
 async function printFullReport(){
   const originalPage = activePage;
   const originalLocal = JSON.parse(JSON.stringify(LOCAL));
   const pagesToPrint = PAGES.filter(p=> !(AUTH.role==='fed' && p.id==='federations'));
   const filtersText = activeFiltersSummaryText();
+  const roleLabel = AUTH.role==='admin' ? 'مدير (كل الاتحادات)' : AUTH.role==='reviewer' ? ('مراجع — '+(AUTH.reviewerName||'')) : ('اتحاد — '+(FEDMETA[AUTH.fedId]?.nameAr || AUTH.fedId));
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB');
+  const logoDataUrl = getLogoDataUrl();
+  const letterhead = letterheadHTML(logoDataUrl, roleLabel, dateStr, filtersText);
 
   printReportBtn.disabled = true;
   printReportBtn.textContent = '⏳ جاري تجهيز التقرير...';
@@ -2155,7 +2177,9 @@ async function printFullReport(){
         img.style.cssText = 'max-width:100%; width:100%; height:auto; display:block;';
         if(cloneCanvases[i]) cloneCanvases[i].replaceWith(img);
       });
+      /* الاكليشة (الشعار + بيانات التقرير) تتكرر أعلى كل قسم/صفحة مطبوعة */
       sectionsHtml += `<section class="print-section">
+        ${letterhead}
         <h2 class="print-section-title">${p.label}</h2>
         ${clone.innerHTML}
       </section>`;
@@ -2171,9 +2195,6 @@ async function printFullReport(){
   }
 
   const appStyles = document.querySelector('style') ? document.querySelector('style').innerHTML : '';
-  const roleLabel = AUTH.role==='admin' ? 'مدير (كل الاتحادات)' : AUTH.role==='reviewer' ? ('مراجع — '+(AUTH.reviewerName||'')) : ('اتحاد — '+(FEDMETA[AUTH.fedId]?.nameAr || AUTH.fedId));
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('ar-SA') + ' ' + now.toLocaleTimeString('ar-SA');
 
   const win = window.open('', '_blank');
   if(!win){ alert('الرجاء السماح بالنوافذ المنبثقة (Popups) لهذا الموقع حتى تتمكن من طباعة التقرير.'); return; }
@@ -2188,10 +2209,12 @@ async function printFullReport(){
 ${appStyles}
 body{background:#fff; padding:0 26px 40px;}
 .filters-wrap, nav.tabs, header.top .reupload-btn, .hint-click, .reset-btn, .ms-panel{display:none !important;}
-.print-report-head{padding:24px 0 14px; border-bottom:3px solid var(--forest); margin-bottom:10px;}
-.print-report-head h1{margin:0 0 6px; font-size:20px; color:var(--forest);}
-.print-report-head .meta{font-size:12px; color:var(--muted); line-height:1.9;}
-.print-section{margin-top:18px; break-inside:avoid-page;}
+.print-letterhead{display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:3px solid var(--forest); margin-bottom:16px;}
+.print-logo{height:60px; width:auto; max-width:200px; object-fit:contain; flex:none;}
+.print-letterhead-title{font-size:17px; font-weight:800; color:var(--forest); font-family:'Cairo',sans-serif;}
+.print-letterhead-sub{font-size:11.5px; color:var(--muted); margin-top:2px;}
+.print-letterhead-meta{font-size:10.5px; color:var(--muted); margin-top:6px; line-height:1.7;}
+.print-section{margin-top:0; break-inside:avoid-page;}
 .print-section-title{background:linear-gradient(90deg,var(--forest),var(--forest-2)); color:#fff; font-size:15px;
   padding:10px 16px; border-radius:10px; margin:0 0 14px;}
 .print-section .panel, .print-section .kpi, .print-section .cat-card{break-inside:avoid;}
@@ -2205,14 +2228,6 @@ main#page{max-width:none; margin:0; padding:0;}
 </style>
 </head>
 <body>
-  <div class="print-report-head">
-    <h1>تقرير شامل — منصة التحليل المالي والتشغيلي للاتحادات</h1>
-    <div class="meta">
-      نوع المستخدم: ${roleLabel}<br>
-      تاريخ ووقت الطباعة: ${dateStr}<br>
-      الفلاتر المُطبّقة: ${filtersText}
-    </div>
-  </div>
   <main id="page">${sectionsHtml}</main>
 </body>
 </html>`);
