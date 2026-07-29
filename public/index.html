@@ -2154,7 +2154,11 @@ async function printFullReport(){
   const prevAnimation = Chart.defaults.animation;
   Chart.defaults.animation = false; /* لضمان اكتمال رسم كل الرسوم قبل تحويلها لصورة */
 
-  let sectionsHtml = '';
+  /* بدل ما نطبع كل تبويب كقطعة واحدة طويلة (وتضطر لحيلة fixed-position عشان تكرار الاكليشة، واللي تسببت بتداخل)،
+     نقسّم كل تبويب إلى "كتل" (كل صف بطاقات KPI، كل صف رسوم بيانية، كل جدول... إلخ — أي عنصر مباشر داخل #page)،
+     وكل كتلة توضع بصفحة طباعة مستقلة مع نسخة عادية (غير fixed) من الاكليشة أعلاها. هالطريقة تضمن 100% عدم أي تداخل
+     لأنها تدفق طبيعي عادي بدون أي حسابات ارتفاع أو مواضع ثابتة. */
+  const printPages = [];
   try{
     for(const p of pagesToPrint){
       document.getElementById('loaderText').textContent = `جاري تجهيز قسم: ${p.label}...`;
@@ -2176,10 +2180,11 @@ async function printFullReport(){
         img.style.cssText = 'max-width:100%; width:100%; height:auto; display:block;';
         if(cloneCanvases[i]) cloneCanvases[i].replaceWith(img);
       });
-      sectionsHtml += `<section class="print-section">
-        <h2 class="print-section-title">${p.label}</h2>
-        ${clone.innerHTML}
-      </section>`;
+
+      const blocks = Array.from(clone.children);
+      blocks.forEach((block, idx)=>{
+        printPages.push({ label: p.label, showTitle: idx===0, html: block.outerHTML });
+      });
     }
   }finally{
     Chart.defaults.animation = prevAnimation;
@@ -2190,6 +2195,15 @@ async function printFullReport(){
     printReportBtn.disabled = false;
     printReportBtn.textContent = '🖨️ طباعة تقرير شامل';
   }
+
+  let bodyHtml = '';
+  printPages.forEach(pg=>{
+    bodyHtml += `<div class="print-page">
+      ${letterhead}
+      ${pg.showTitle ? `<h2 class="print-section-title">${pg.label}</h2>` : ''}
+      <div class="print-block">${pg.html}</div>
+    </div>`;
+  });
 
   const appStyles = document.querySelector('style') ? document.querySelector('style').innerHTML : '';
 
@@ -2206,52 +2220,31 @@ async function printFullReport(){
 ${appStyles}
 body{background:#fff; padding:0;}
 .filters-wrap, nav.tabs, header.top .reupload-btn, .hint-click, .reset-btn, .ms-panel{display:none !important;}
-.print-letterhead{display:flex; align-items:center; gap:14px; padding:10px 26px; border-bottom:3px solid var(--forest); background:#fff; overflow:hidden;}
+.print-letterhead{display:flex; align-items:center; gap:14px; padding:10px 26px; border-bottom:3px solid var(--forest); background:#fff; overflow:hidden; margin-bottom:14px;}
 .print-logo{height:50px; width:auto; max-width:170px; object-fit:contain; flex:none;}
 .print-letterhead-text{min-width:0; flex:1;}
 .print-letterhead-title{font-size:15px; font-weight:800; color:var(--forest); font-family:'Cairo',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .print-letterhead-sub{font-size:10.5px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .print-letterhead-meta{font-size:9.5px; color:var(--muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.print-section{margin-top:18px; break-inside:avoid-page;}
-.print-section:first-child{margin-top:0;}
+.print-page{padding:0 26px 30px;}
 .print-section-title{background:linear-gradient(90deg,var(--forest),var(--forest-2)); color:#fff; font-size:15px;
   padding:10px 16px; border-radius:10px; margin:0 0 14px;}
-.print-section .panel, .print-section .kpi, .print-section .cat-card{break-inside:avoid;}
-main#page{max-width:none; margin:0; padding:14px 26px 40px;}
+.print-block .panel, .print-block .kpi, .print-block .cat-card{break-inside:avoid;}
 @media print{
-  /* الاكليشة (الشعار وبيانات التقرير) عنصر واحد بوضع fixed، والمتصفح (Chrome/Edge) يكرره تلقائياً أعلى كل صفحة ورقية عند الطباعة.
-     نحجز له مساحة تقريبية هنا كقيمة احتياطية، ثم نُصحّحها بدقة عبر JS بعد قياس ارتفاعه الفعلي (انظر الكود بالأسفل) حتى لا يتداخل مع المحتوى مطلقاً */
-  @page{ margin: 130px 18px 35px 18px; }
+  @page{ margin: 16px 18px 30px 18px; }
   body{padding:0;}
-  .print-letterhead{position:fixed; top:0; left:0; right:0; z-index:1000;}
-  main#page{padding:0;}
-  .print-section{page-break-before:always; margin-top:0;}
-  .print-section:first-child{page-break-before:auto;}
+  .print-page{page-break-before:always; padding:0 26px 20px;}
+  .print-page:first-child{page-break-before:auto;}
   .panel, .kpi, .cat-card, .table-wrap{break-inside:avoid;}
 }
 </style>
 </head>
 <body>
-  ${letterhead}
-  <main id="page">${sectionsHtml}</main>
+  ${bodyHtml}
 </body>
 </html>`);
   win.document.close();
-  win.onload = async ()=>{
-    /* نضبط هامش الصفحة العلوي بدقة على الارتفاع الفعلي للاكليشة (بعد اكتمال تحميل الخطوط والشعار)
-       حتى تكون المساحة المحجوزة مطابقة تماماً وما يصير أي تداخل بين المحتوى والاكليشة بأي صفحة */
-    try{ if(win.document.fonts && win.document.fonts.ready) await win.document.fonts.ready; }catch(e){}
-    await new Promise(r=> setTimeout(r, 300));
-    try{
-      const lh = win.document.querySelector('.print-letterhead');
-      const h = lh ? Math.ceil(lh.getBoundingClientRect().height) : 110;
-      const margin = h + 22; /* هامش أمان إضافي */
-      const styleTag = win.document.createElement('style');
-      styleTag.textContent = `@page{ margin-top:${margin}px !important; }`;
-      win.document.head.appendChild(styleTag);
-    }catch(e){}
-    win.print();
-  };
+  win.onload = ()=>{ setTimeout(()=> win.print(), 400); };
 }
 printReportBtn.addEventListener('click', printFullReport);
 
